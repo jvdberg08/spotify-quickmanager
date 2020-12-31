@@ -1,5 +1,25 @@
 <template>
   <b-row v-if="likedSongs != null" class="songs-container py-3 px-0 px-sm-5 ">
+    <b-col cols="12">
+      <b-row align-h="center">
+        <b-col cols="2">
+          <b-btn class="song-menu-button" size="lg" variant="outline-danger" v-on:click="deleteSongs(selectedSongs)">
+            Delete Selected
+          </b-btn>
+        </b-col>
+        <b-col cols="2">
+          <b-btn class="song-menu-button" size="lg" variant="outline-success">
+            Add To Playlist (Todo)
+          </b-btn>
+        </b-col>
+        <b-col cols="2" class="justify-content-center">
+          <b-btn class="song-menu-button" size="lg" variant="outline-primary" v-on:click="getSongs(0, 25)">
+            Refresh Songs
+          </b-btn>
+        </b-col>
+      </b-row>
+    </b-col>
+
     <b-col v-for="(song, index) in likedSongs.items" :key="String(song.track.id)" cols="12" lg="6" xl="4"
            class="py-4 px-5">
       <b-row>
@@ -21,7 +41,8 @@
               </b-row>
             </b-col>
             <b-col cols="2" class="song-select-container pl-4">
-              <b-form-checkbox :id="'select-song-' + index" size="lg"/>
+              <b-form-checkbox :id="'select-song-' + index" :value="song.track.id" v-model="selectedSongs"
+                               size="lg"/>
             </b-col>
           </b-row>
           <b-row class="song-half-container p-3">
@@ -42,17 +63,21 @@ export default {
 
   data() {
     return {
-      likedSongs: []
+      selectedSongs: []
     }
   },
 
   beforeMount() {
-    this.likedSongs = this.getSongs(0, 25)
-  }
+    this.getSongs(0, 25)
+  },
 }
 </script>
 
 <style scoped>
+
+.song-menu-button {
+  margin-left: auto;
+}
 
 .song-container {
   min-width: 400px;
