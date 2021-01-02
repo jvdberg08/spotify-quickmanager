@@ -84,6 +84,8 @@ export default {
     getSongs(offset, limit) {
       if (!this.checkAuthorization()) return
 
+      this.selectedSongs = []
+
       if (offset < 0) offset = 0
       if (offset >= this.likedSongs.total) return
       if (limit < 24) limit = 24
