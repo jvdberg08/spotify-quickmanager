@@ -1,5 +1,7 @@
 <template>
-<div></div>
+  <b-row>
+
+  </b-row>
 </template>
 
 <script>
