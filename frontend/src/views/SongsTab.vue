@@ -82,9 +82,7 @@ export default {
 
   methods: {
     getSongs(offset, limit) {
-      if (!this.checkAuthorization()) {
-        // TODO error message
-      }
+      if (!this.checkAuthorization()) return
 
       if (offset < 0) offset = 0
       if (offset >= this.likedSongs.total) return
