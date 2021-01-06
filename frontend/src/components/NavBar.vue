@@ -25,14 +25,14 @@
       </b-row>
 
       <b-row>
-        <b-col class="horizontal-divider"></b-col>
+        <b-col class="mx-4 horizontal-divider"></b-col>
       </b-row>
     </b-col>
   </b-row>
 </template>
 
 <script>
-import ApiInterface from "@/api-interface"
+import ApiInterface from "@/mixins/api-interface"
 
 export default {
   name: "NavBar",
@@ -49,7 +49,6 @@ export default {
 .navbar-container {
   text-align: center;
   min-width: 100vw;
-  /*background: linear-gradient(90deg, #FCFF5A, #01B636 50%, #55F2A7 100%);*/
 }
 
 .login-button {
@@ -107,7 +106,6 @@ export default {
 }
 
 .horizontal-divider {
-  margin: 10px 100px 0 100px;
   border: 1px solid #00000099;
 }
 

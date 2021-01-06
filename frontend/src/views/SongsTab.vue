@@ -1,66 +1,66 @@
 <template>
-  <b-row v-if="likedSongs != null" class="songs-container py-3 px-0 px-sm-5 ">
-    <b-col cols="12">
-      <b-row class="text-center" align-h="center">
-        <b-col cols="3" md="2">
-          <b-btn class="song-menu-button" size="lg" variant="outline-primary"
-                 v-on:click="getSongs(offset-24, limit-24)">
-            Previous
-          </b-btn>
-        </b-col>
-        <b-col cols="3" md="2">
-          <b-btn class="song-menu-button" size="lg" variant="outline-danger" v-on:click="deleteSongs(selectedSongs)">
-            Delete Selected
-          </b-btn>
-        </b-col>
-        <b-col cols="3" md="2">
-          <b-btn class="song-menu-button" size="lg" variant="outline-success" v-on:click="getSongs(offset, limit)">
-            Refresh Songs
-          </b-btn>
-        </b-col>
-        <b-col cols="3" md="2">
-          <b-btn class="song-menu-button" size="lg" variant="outline-primary"
-                 v-on:click="getSongs(offset+24, limit+24)">
-            Next
-          </b-btn>
-        </b-col>
-      </b-row>
-    </b-col>
+  <b-col v-if="likedSongs != null" class="songs-container py-3 px-0 px-sm-5 ">
+    <b-row class="text-center" align-h="center">
+      <b-col cols="3" md="2">
+        <b-btn class="song-menu-button" size="lg" variant="outline-primary"
+               v-on:click="getSongs(offset-24, limit-24)">
+          Previous
+        </b-btn>
+      </b-col>
+      <b-col cols="3" md="2">
+        <b-btn class="song-menu-button" size="lg" variant="outline-danger" v-on:click="deleteSongs(selectedSongs)">
+          Delete Selected
+        </b-btn>
+      </b-col>
+      <b-col cols="3" md="2">
+        <b-btn class="song-menu-button" size="lg" variant="outline-success" v-on:click="getSongs(offset, limit)">
+          Refresh Songs
+        </b-btn>
+      </b-col>
+      <b-col cols="3" md="2">
+        <b-btn class="song-menu-button" size="lg" variant="outline-primary"
+               v-on:click="getSongs(offset+24, limit+24)">
+          Next
+        </b-btn>
+      </b-col>
+    </b-row>
 
-    <b-col v-for="(song, index) in likedSongs.items" :key="String(song.track.id)" cols="12" lg="6" xl="4"
-           class="py-4 px-5" v-on:click="selectSong(index)">
-      <b-row>
-        <b-col class="song-container p-0 m-auto">
-          <b-row class="song-half-container p-3">
-            <b-col cols="2" class="song-image-container">
-              <b-img :src="song.track.album.images[2].url"/>
-            </b-col>
-            <b-col cols="8" class="pl-4">
-              <b-row>
-                <b-col class="song-name">
-                  <strong> {{ song.track.name }}</strong>
-                </b-col>
-              </b-row>
-              <b-row>
-                <b-col class="song-artists">
-                  {{ getArtistString(song) }}
-                </b-col>
-              </b-row>
-            </b-col>
-            <b-col cols="2" class="song-select-container pl-4">
-              <b-form-checkbox :id="'select-song-' + index" :value="index" v-model="selectedSongs"
-                               size="lg"/>
-            </b-col>
-          </b-row>
-        </b-col>
-      </b-row>
-    </b-col>
-  </b-row>
+    <b-row>
+      <b-col v-for="song in likedSongs.items" :key="String(song.track.id)" cols="12" lg="6" xl="4"
+             class="py-4 px-5">
+        <b-row>
+          <b-col class="song-container p-0 m-auto" v-on:click="selectSong(song.track.id)">
+            <b-row class="song-half-container p-3">
+              <b-col cols="2" class="song-image-container">
+                <b-img :src="song.track.album.images[2].url"/>
+              </b-col>
+              <b-col cols="8" class="pl-4">
+                <b-row>
+                  <b-col class="song-name">
+                    <strong> {{ song.track.name }}</strong>
+                  </b-col>
+                </b-row>
+                <b-row>
+                  <b-col class="song-artists">
+                    {{ getArtistString(song) }}
+                  </b-col>
+                </b-row>
+              </b-col>
+              <b-col cols="2" class="song-select-container pl-4">
+                <b-form-checkbox :id="'select-song-' + song.track.id" :value="song.track.id" v-model="selectedSongs"
+                                 size="lg"/>
+              </b-col>
+            </b-row>
+          </b-col>
+        </b-row>
+      </b-col>
+    </b-row>
+  </b-col>
 </template>
 
 <script>
-import ApiInterface from "@/api-interface"
-import Util from "@/util"
+import ApiInterface from "@/mixins/api-interface"
+import Util from "@/mixins/util"
 
 export default {
   mixins: [ApiInterface, Util],
@@ -77,14 +77,12 @@ export default {
   },
 
   beforeMount() {
-    this.getSongs(0, 24)
+    this.getSongs(this.offset, this.limit)
   },
 
   methods: {
     getSongs(offset, limit) {
       if (!this.checkAuthorization()) return
-
-      this.selectedSongs = []
 
       if (offset < 0) offset = 0
       if (offset >= this.likedSongs.total) return
@@ -100,31 +98,26 @@ export default {
       })
     },
 
-    deleteSongs(songIndexes) {
+    deleteSongs(songIds) {
       if (!this.checkAuthorization()) {
         // TODO error message
       }
 
-      const vm = this
-      const songs = songIndexes.map(function (songIndex) {
-        return vm.likedSongs.items[songIndex].track.id
-      })
-
-      const songsString = songs.join()
+      const songsString = songIds.join()
       this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_songs', { // TODO post request
         withCredentials: true,
         params: {ids: songsString}
       }).then(() => {
         this.selectedSongs = []
-        this.likedSongs.items = this.likedSongs.items.filter(song => !songs.includes(song.track.id))
+        this.getSongs(this.offset, this.limit)
       })
     },
 
-    selectSong(index) {
-      if (this.selectedSongs.includes(index)) {
-        this.selectedSongs.splice(this.selectedSongs.indexOf(index), 1)
+    selectSong(songId) {
+      if (this.selectedSongs.includes(songId)) {
+        this.selectedSongs.splice(this.selectedSongs.indexOf(songId), 1)
       } else {
-        this.selectedSongs.push(index)
+        this.selectedSongs.push(songId)
       }
     }
   }
