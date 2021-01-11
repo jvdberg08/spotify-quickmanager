@@ -1,7 +1,8 @@
 FROM python:3
 ENV PYTHONUNBUFFERED=1
 
-COPY . /spotify-quickmanager-backend
+COPY ./requirements.txt ./django/
 
-WORKDIR ./spotify-quickmanager-backend
+WORKDIR ./django
+
 RUN pip install -r requirements.txt

@@ -1,6 +1,7 @@
 FROM node:14-alpine
 
-COPY . ./spotify-quickmanager-frontend
+COPY ./package.json ./vuejs/
 
-WORKDIR ./spotify-quickmanager-frontend
+WORKDIR ./vuejs
+
 RUN npm install

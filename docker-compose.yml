@@ -2,19 +2,19 @@ version: '3'
 
 services:
   django:
-    image: spotify-quickmanager-backend-dev
+    image: spotify-quickmanager-django
     build: ./backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/backend
+      - ./backend:/django
     ports:
       - "8000:8000"
   vue:
-    image: spotify-quickmanager-frontend-dev
+    image: spotify-quickmanager-vuejs
     build: ./frontend
     command: npm run serve
     volumes:
-      - .:/frontend
+      - ./frontend:/vuejs
     ports:
       - "8080:8080"
     depends_on:
