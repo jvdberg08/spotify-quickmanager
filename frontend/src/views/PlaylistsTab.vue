@@ -80,12 +80,11 @@
 
 <script>
 import ApiInterface from '../mixins/api-interface'
-import Util from '../mixins/util'
 
 export default {
 
   name: "PlaylistsTab",
-  mixins: [ApiInterface, Util],
+  mixins: [ApiInterface],
 
   data() {
     return {

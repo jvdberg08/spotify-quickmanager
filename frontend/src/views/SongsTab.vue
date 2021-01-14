@@ -1,75 +1,61 @@
 <template>
-  <b-col v-if="likedSongs != null" class="songs-container py-3 px-0 px-sm-5 ">
-    <b-row class="text-center" align-h="center">
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-primary"
-               v-on:click="getSongs(offset-24, limit-24)">
-          Previous
-        </b-btn>
-      </b-col>
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-danger" v-on:click="deleteSongs(selectedSongs)">
-          Delete Selected
-        </b-btn>
-      </b-col>
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-success" v-on:click="getSongs(offset, limit)">
-          Refresh Songs
-        </b-btn>
-      </b-col>
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-primary"
-               v-on:click="getSongs(offset+24, limit+24)">
-          Next
-        </b-btn>
-      </b-col>
-    </b-row>
+  <b-row>
+    <SelectPlaylistModal :id="'add-songs-to-playlist-modal'" :title="'Add Selected Songs to Playlist'"
+                         @ok="addSongsToPlaylist"/>
 
-    <b-row>
-      <b-col v-for="song in likedSongs.items" :key="String(song.track.id)" cols="12" lg="6" xl="4"
-             class="py-4 px-5">
-        <b-row>
-          <b-col class="song-container p-0 m-auto" v-on:click="selectSong(song.track.id)">
-            <b-row class="song-half-container p-3">
-              <b-col cols="2" class="song-image-container">
-                <b-img :src="song.track.album.images[2].url"/>
-              </b-col>
-              <b-col cols="8" class="pl-4">
-                <b-row>
-                  <b-col class="song-name">
-                    <strong> {{ song.track.name }}</strong>
-                  </b-col>
-                </b-row>
-                <b-row>
-                  <b-col class="song-artists">
-                    {{ getArtistString(song) }}
-                  </b-col>
-                </b-row>
-              </b-col>
-              <b-col cols="2" class="song-select-container pl-4">
-                <b-form-checkbox :id="'select-song-' + song.track.id" :value="song.track.id" v-model="selectedSongs"
-                                 size="lg"/>
-              </b-col>
-            </b-row>
-          </b-col>
-        </b-row>
-      </b-col>
-    </b-row>
-  </b-col>
+    <b-col class="py-3 px-0 px-sm-5">
+
+      <b-row class="text-center" align-h="center">
+        <MenuButton container-size="col-4 col-sm-3 col-md-2"
+                    button-text="Previous" button-size="lg"
+                    v-on:clicked="getSongs(offset - songsPerPage, limit)"/>
+
+        <MenuDropdownButton container-size="col-4 col-sm-3 col-md-2"
+                            button-text="Actions" button-size="lg" button-variant="primary">
+          <b-dropdown-item @click="getSongs(offset, limit)">Refresh</b-dropdown-item>
+          <b-dropdown-item @click="openSelectPlaylistsModal">Add Selected To Playlist
+          </b-dropdown-item>
+          <b-dropdown-item @click="removeSongs(selectedSongs)">Remove Selected from Liked Songs</b-dropdown-item>
+        </MenuDropdownButton>
+
+        <MenuButton container-size="col-4 col-sm-3 col-md-2"
+                    button-text="Next" button-size="lg"
+                    v-on:clicked="getSongs(offset + songsPerPage, limit)"/>
+      </b-row>
+
+      <b-row class="px-5 py-3">
+        <b-col class="p-2" cols="12" lg="4" xl="3" v-for="song in likedSongs.items" :key="String(song.track.id)"
+               v-on:click="selectSong(song.track.id)">
+          <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)"/>
+        </b-col>
+      </b-row>
+
+    </b-col>
+  </b-row>
 </template>
 
 <script>
+import Song from "@/components/Song";
 import ApiInterface from "@/mixins/api-interface"
-import Util from "@/mixins/util"
+import MenuButton from "@/components/MenuButton";
+import MenuDropdownButton from "@/components/MenuDropdownButton";
+import SelectPlaylistModal from "@/views/SelectPlaylistModal";
 
 export default {
-  mixins: [ApiInterface, Util],
+  mixins: [ApiInterface],
   name: "SongsTab",
+  components: {
+    Song,
+    MenuButton,
+    MenuDropdownButton,
+    SelectPlaylistModal
+  },
 
   data() {
     return {
       offset: 0,
-      limit: 24,
+      limit: 28,
+      songsPerPage: 28,
 
       likedSongs: [],
       selectedSongs: [],
@@ -86,7 +72,7 @@ export default {
 
       if (offset < 0) offset = 0
       if (offset >= this.likedSongs.total) return
-      if (limit < 24) limit = 24
+      if (limit < this.songsPerPage) limit = this.songsPerPage
 
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/songs", {
         withCredentials: true,
@@ -98,18 +84,29 @@ export default {
       })
     },
 
-    deleteSongs(songIds) {
+    removeSongs(songIds) {
       if (!this.checkAuthorization()) {
-        // TODO error message
+        this.$bvModal.msgBoxOk('Something went wrong while authenticating! Try logging out and loggin in again!', {
+          title: 'Error', okVariant: 'danger'
+        })
       }
 
-      const songsString = songIds.join()
-      this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_songs', { // TODO post request
-        withCredentials: true,
-        params: {ids: songsString}
-      }).then(() => {
-        this.selectedSongs = []
-        this.getSongs(this.offset, this.limit)
+      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete everything.', {
+        title: 'Error', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
+      }).then(value => {
+        if (value) {
+          const songsString = songIds.join()
+          this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_songs', { // TODO post request
+            withCredentials: true,
+            params: {ids: songsString}
+          }).then(() => {
+            this.selectedSongs = []
+            this.getSongs(this.offset, this.limit)
+            this.$bvModal.msgBoxOk('Successfully removed songs from Liked Songs!', {
+              title: 'Success', okVariant: 'success'
+            })
+          })
+        }
       })
     },
 
@@ -119,50 +116,38 @@ export default {
       } else {
         this.selectedSongs.push(songId)
       }
+    },
+
+    openSelectPlaylistsModal() {
+      if (!this.selectedSongs.length) {
+        this.$bvModal.msgBoxOk('Please select at least one song!', {
+          title: 'Error', size: 'sm', buttonSize: 'sm', okVariant: 'danger', centered: true
+        })
+      } else {
+        this.$bvModal.show('add-songs-to-playlist-modal')
+      }
+    },
+
+    addSongsToPlaylist(playlistIds) {
+      const playlistString = playlistIds.join()
+      const songsString = this.selectedSongs.join()
+      this.$axios.get('http://127.0.0.1:8000/spotifyapi/add_songs_to_playlists', { // TODO post request
+        withCredentials: true,
+        params: {
+          'songIds': songsString,
+          'playlistIds': playlistString
+        }
+      }).then(() => {
+        this.selectedSongs = []
+        this.$bvModal.msgBoxOk('Successfully added songs to the playlists!', {
+          title: 'Success', okVariant: 'success'
+        })
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-
-.song-menu-button {
-  min-height: 100%;
-  width: 10vw;
-  min-width: 100px;
-}
-
-.song-container {
-  min-width: 400px;
-  max-width: 600px;
-
-  text-align: center;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-  border-radius: 30px;
-}
-
-.song-name {
-  text-align: left;
-  font-size: 22px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.song-artists {
-  text-align: left;
-  font-size: 18px;
-  white-space: nowrap;
-  overflow: hidden
-}
-
-.song-image-container {
-  max-width: 64px;
-}
-
-.song-image-container img {
-  border-radius: 15px;
-}
 
 </style>
