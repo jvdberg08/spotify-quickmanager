@@ -1,5 +1,5 @@
 <template>
-  <b-row>
+  <b-row v-if="this.$store.getters.checkAuthorization">
     <SelectPlaylistModal :id="'add-songs-to-playlist-modal'" :title="'Add Selected Songs to Playlist'"
                          @ok="addSongsToPlaylist"/>
 
@@ -35,8 +35,9 @@
 </template>
 
 <script>
+import util from "@/mixins/util"
+
 import Song from "@/components/Song";
-import ApiInterface from "@/mixins/api-interface"
 import MenuButton from "@/components/MenuButton";
 import MenuDropdownButton from "@/components/MenuDropdownButton";
 import SelectPlaylistModal from "@/views/SelectPlaylistModal";
@@ -44,7 +45,7 @@ import SelectPlaylistModal from "@/views/SelectPlaylistModal";
 export default {
 
   name: "SongsTab",
-  mixins: [ApiInterface],
+  mixins: [util],
 
   components: {
     Song,
@@ -64,9 +65,9 @@ export default {
     }
   },
 
-  async beforeMount() {
-    if (await this.checkAuthorization(true)) {
-      await this.getSongs(this.offset, this.limit)
+  beforeMount() {
+    if (this.$store.getters.checkAuthorization) {
+      this.getSongs(this.offset, this.limit)
     }
   },
 
@@ -80,6 +81,11 @@ export default {
     },
 
     openSelectPlaylistsModal() {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
+
       if (!this.selectedSongs.length) {
         this.$bvModal.msgBoxOk('Please select at least one song!', {
           title: 'Error', size: 'sm', buttonSize: 'sm', okVariant: 'danger'
@@ -89,7 +95,12 @@ export default {
       }
     },
 
-    async getSongs(offset, limit) {
+    getSongs(offset, limit) {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
+
       if (offset < 0) offset = 0
       if (offset >= this.likedSongs.total) return
       if (limit < this.songsPerPage) limit = this.songsPerPage
@@ -104,7 +115,12 @@ export default {
       }).catch(error => this.createErrorDialog(error.response.status))
     },
 
-    async removeSongs(songIds) {
+    removeSongs(songIds) {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
+
       this.$bvModal.msgBoxConfirm('Are you sure you want to remove all selected songs from your Liked Songs?', {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
       }).then(value => {
@@ -126,8 +142,11 @@ export default {
       )
     },
 
-    async addSongsToPlaylist(playlistIds) {
-      if (!await this.checkAuthorization(false)) return
+    addSongsToPlaylist(playlistIds) {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
 
       const playlistString = playlistIds.join()
       const songsString = this.selectedSongs.join()

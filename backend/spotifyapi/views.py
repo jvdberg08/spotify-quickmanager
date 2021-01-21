@@ -80,7 +80,8 @@ def unfollow_playlists(request):
         if response.status_code != 200:
             error_codes.append(response.status_code)
 
-    return HttpResponse(status=max(set(error_codes), key=error_codes.count))
+    status = max(set(error_codes), key=error_codes.count) if error_codes else 200
+    return HttpResponse(status=status)
 
 
 def add_songs_to_playlists(request):

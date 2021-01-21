@@ -6,6 +6,7 @@ from urllib import parse
 import requests
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.conf import settings
 
 CLIENT_ID = 'client_id_here'
 CLIENT_SECRET = 'client_secret_here'
@@ -75,12 +76,7 @@ def authorize(request):
 
 
 def authorized(request):
-    error = request.GET.get(key='error')
-    if error:
-        return redirect('http://127.0.0.1:8080/?login=error')
-
     code = request.GET.get(key='code')
-
     payload = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -97,7 +93,7 @@ def authorized(request):
     request.session['access_token'] = access_token
     request.session['refresh_token'] = refresh_token
     request.session['expires_on'] = expires_on
-    return redirect('http://127.0.0.1:8080/')
+    return redirect('http://127.0.0.1:8080/?authExpiry=' + str((settings.SESSION_COOKIE_AGE * 1000 + int(time() * 1000))))
 
 
 def un_authorize(request):
