@@ -1,108 +1,71 @@
 <template>
-  <b-col v-if="playlists != null" class="py-3 px-0 px-sm-5">
-    <b-row class="text-center" align-h="center">
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-primary"
-               v-on:click="getPlaylists(offset-10, limit-10)">
-          Previous
-        </b-btn>
-      </b-col>
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-danger"
-               v-on:click="deletePlaylists(selectedPlaylists)">
-          Delete Selected
-        </b-btn>
-      </b-col>
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-success" v-on:click="getPlaylists(offset, limit)">
-          Refresh Playlists
-        </b-btn>
-      </b-col>
-      <b-col cols="3" md="2">
-        <b-btn class="song-menu-button" size="lg" variant="outline-primary"
-               v-on:click="getPlaylists(offset+10, limit+10)">
-          Next
-        </b-btn>
-      </b-col>
-    </b-row>
+  <b-row>
+    <b-col class="py-3 px-0 px-sm-5">
 
-    <b-row class="playlists-table py-4 px-0 justify-content-center">
-      <b-col cols="12" md="8">
-        <b-row class="playlists-headers">
-          <b-col cols="3" offset="1"><strong>Name</strong></b-col>
-          <b-col cols="4"><strong>Description</strong></b-col>
-          <b-col cols="2"><strong>Owner</strong></b-col>
-          <b-col cols="1" class="text-center"><strong>Songs</strong></b-col>
-          <b-col cols="1" class="text-center"><strong>Public</strong></b-col>
-        </b-row>
+      <b-row class="text-center" align-h="center">
+        <MenuButton container-size="col-4 col-sm-3 col-md-2"
+                    button-text="Previous" button-size="lg"
+                    v-on:clicked="getPlaylists(offset - songsPerPage, limit)"/>
 
-        <b-row cols="12" class="playlist-container py-2" v-for="playlist in playlists.items"
-               :key="String(playlist.id)" v-on:click="selectPlaylist(playlist.id)">
+        <MenuDropdownButton container-size="col-4 col-sm-3 col-md-2"
+                            button-text="Actions" button-size="lg" button-variant="primary">
+          <b-dropdown-item @click="getPlaylists(offset, limit)">Refresh</b-dropdown-item>
+          <b-dropdown-item @click="unfollowPlaylists">Unfollow Selected Playlists</b-dropdown-item>
+        </MenuDropdownButton>
 
-          <b-col cols="1" class="playlist-select my-auto">
-            <b-form-checkbox :id="'select-playlist-' + playlist.id" :value="playlist.id" v-model="selectedPlaylists"
-                             size="lg"/>
-          </b-col>
+        <MenuButton container-size="col-4 col-sm-3 col-md-2"
+                    button-text="Next" button-size="lg"
+                    v-on:clicked="getPlaylists(offset + songsPerPage, limit)"/>
+      </b-row>
 
-          <b-col cols="3" class="playlist-big">
-            <b-col class="p-0">
-              <b-img class="playlist-image" :src="playlist.images[0].url"/>
-              {{ playlist.name }}
-            </b-col>
-          </b-col>
+      <b-row class="px-5 py-3">
+        <b-col class="p-2" cols="12" lg="4" xl="3" v-for="playlist in playlists.items" :key="String(playlist.id)"
+               v-on:click="selectPlaylist(playlist.id)">
+          <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist.id)"/>
+        </b-col>
+      </b-row>
 
-          <b-col cols="4" class="playlist-small">
-            <b-col v-if="playlist.description !== ''" class="p-0">{{ playlist.description }}</b-col>
-            <b-col v-else class="p-0">-</b-col>
-          </b-col>
-
-          <b-col cols="2" class="playlist-big">
-            <b-col class="p-0">{{ playlist.owner.display_name }}</b-col>
-          </b-col>
-
-          <b-col cols="1" class="playlist-big text-center">
-            <b-col class="p-0">{{ playlist.tracks.total }}</b-col>
-          </b-col>
-
-          <b-col cols="1" class="text-center m-auto">
-            <b-img v-if="playlist.public" class="playlist-public"
-                   src="https://upload.wikimedia.org/wikipedia/commons/3/3b/Eo_circle_green_checkmark.svg"
-                   alt="True"/>
-            <b-img v-else class="playlist-public"
-                   src="https://icon-library.net/images/close-icon-png/close-icon-png-19.jpg" alt="False"/>
-          </b-col>
-
-        </b-row>
-      </b-col>
-    </b-row>
-  </b-col>
+    </b-col>
+  </b-row>
 </template>
 
 <script>
-import ApiInterface from '../mixins/api-interface'
+import ApiInterface from "../mixins/api-interface"
+import Playlist from "@/components/Playlist";
+import MenuButton from "@/components/MenuButton"
+import MenuDropdownButton from "@/components/MenuDropdownButton"
 
 export default {
 
   name: "PlaylistsTab",
   mixins: [ApiInterface],
 
+  components: {
+    Playlist,
+    MenuButton,
+    MenuDropdownButton
+  },
+
   data() {
     return {
       offset: 0,
       limit: 10,
+      songsPerPage: 10,
 
       playlists: [],
       selectedPlaylists: []
     }
   },
 
-  beforeMount() {
-    this.getPlaylists(this.offset, this.limit)
+  async beforeMount() {
+    if (await this.checkAuthorization(true)) {
+      await this.getPlaylists(this.offset, this.limit)
+    }
   },
 
   methods: {
-    getPlaylists(offset, limit) {
-      if (!this.checkAuthorization()) return
+    async getPlaylists(offset, limit) {
+      if (!await this.checkAuthorization(false)) return
 
       this.playlists = []
 
@@ -117,22 +80,20 @@ export default {
         this.playlists = response.data
         this.offset = offset
         this.limit = limit
-      })
+      }).catch(error => this.createErrorDialog(error.response.status))
     },
 
-    deletePlaylists(playlistIds) {
-      if (!this.checkAuthorization()) {
-        // TODO error message
-      }
+    async unfollowPlaylists() {
+      if (!await this.checkAuthorization(false)) return
 
-      const playlistsString = playlistIds.join()
-      this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_playlists', { // TODO post request
+      const playlistsString = this.selectedPlaylists.join()
+      this.$axios.get('http://127.0.0.1:8000/spotifyapi/unfollow_playlists', { // TODO post request
         withCredentials: true,
         params: {ids: playlistsString}
       }).then(() => {
         this.selectedPlaylists = []
         this.getPlaylists(this.offset, this.limit)
-      })
+      }).catch(error => this.createErrorDialog(error.response.status))
     },
 
     selectPlaylist(playlistId) {

@@ -29,6 +29,7 @@ import ApiInterface from "@/mixins/api-interface"
 import Playlist from "@/components/Playlist";
 
 export default {
+
   name: "SelectPlaylistModal",
   mixins: [ApiInterface],
 
@@ -53,13 +54,15 @@ export default {
     }
   },
 
-  beforeMount() {
-    this.getPlaylists(this.offset, this.limit)
+  async beforeMount() {
+    if (await this.checkAuthorization(true)) {
+      await this.getPlaylists(this.offset, this.limit)
+    }
   },
 
   methods: {
-    getPlaylists(offset, limit) {
-      if (!this.checkAuthorization()) return
+    async getPlaylists(offset, limit) {
+      if (!await this.checkAuthorization(false)) return
 
       this.playlists = []
 
@@ -74,7 +77,7 @@ export default {
         this.playlists = response.data
         this.offset = offset
         this.limit = limit
-      })
+      }).catch(error => this.createErrorDialog(error.response.status))
     },
 
     selectPlaylist(playlistId) {

@@ -68,13 +68,15 @@ export default {
   font-size: 22px;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-artists {
   text-align: left;
   font-size: 18px;
   white-space: nowrap;
-  overflow: hidden
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .song-image-container {

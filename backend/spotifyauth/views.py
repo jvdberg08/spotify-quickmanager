@@ -4,7 +4,7 @@ from time import time
 from urllib import parse
 
 import requests
-from django.http import JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 
 CLIENT_ID = 'client_id_here'
@@ -24,14 +24,20 @@ def check_session(request):
     refresh_token = request.session.get(key='refresh_token')
     expires_on = request.session.get(key='expires_on')
 
-    is_session_valid = access_token is not None and refresh_token is not None and expires_on is not None
-    return JsonResponse(data={'session_valid': str(is_session_valid).lower()})
+    if access_token is not None and refresh_token is not None and expires_on is not None:
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=401)
 
 
 def is_authorized(request):
-    is_session_valid = True if json.loads(check_session(request).content)['session_valid'] == 'true' else False
+    is_session_valid = check_session(request).status_code == 200
     is_session_authorized = request.session.get(key='expires_on', default=0) > time() * 1000
-    return JsonResponse(data={'session_authorized': str(is_session_valid and is_session_authorized).lower()})
+
+    if is_session_valid and is_session_authorized:
+        return HttpResponse(status=200)
+    else:
+        return HttpResponse(status=401)
 
 
 def refresh(request):
@@ -41,7 +47,11 @@ def refresh(request):
         'refresh_token': refresh_token
     }
     headers = get_auth_headers()
-    response = requests.post(OAUTH_TOKEN_URL, data=payload, headers=headers)
+    response = requests.post(url=OAUTH_TOKEN_URL, data=payload, headers=headers)
+
+    if response.status_code != 200:
+        return HttpResponse(status=response.status_code)
+
     json_response = response.json()
 
     access_token = json_response['access_token']
@@ -49,7 +59,7 @@ def refresh(request):
 
     request.session['access_token'] = access_token
     request.session['expires_on'] = expires_on
-    return JsonResponse(data={'refresh': 'success'})
+    return HttpResponse(status=200)
 
 
 def authorize(request):
@@ -92,7 +102,7 @@ def authorized(request):
 
 def un_authorize(request):
     request.session.flush()
-    return redirect('http://127.0.0.1:8080/')
+    return HttpResponse(status=200)
 
 
 def get_auth_headers():

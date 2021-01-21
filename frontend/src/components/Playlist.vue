@@ -14,8 +14,11 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col class="playlist-description">
+          <b-col v-if="playlist.description" class="playlist-description">
             {{ playlist.description }}
+          </b-col>
+          <b-col v-else class="playlist-description">
+            No description.
           </b-col>
         </b-row>
       </b-col>
@@ -59,7 +62,8 @@ export default {
   text-align: left;
   font-size: 18px;
   white-space: nowrap;
-  overflow: hidden
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .playlist-image-container {

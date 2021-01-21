@@ -42,8 +42,10 @@ import MenuDropdownButton from "@/components/MenuDropdownButton";
 import SelectPlaylistModal from "@/views/SelectPlaylistModal";
 
 export default {
-  mixins: [ApiInterface],
+
   name: "SongsTab",
+  mixins: [ApiInterface],
+
   components: {
     Song,
     MenuButton,
@@ -62,54 +64,13 @@ export default {
     }
   },
 
-  beforeMount() {
-    this.getSongs(this.offset, this.limit)
+  async beforeMount() {
+    if (await this.checkAuthorization(true)) {
+      await this.getSongs(this.offset, this.limit)
+    }
   },
 
   methods: {
-    getSongs(offset, limit) {
-      if (!this.checkAuthorization()) return
-
-      if (offset < 0) offset = 0
-      if (offset >= this.likedSongs.total) return
-      if (limit < this.songsPerPage) limit = this.songsPerPage
-
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/songs", {
-        withCredentials: true,
-        params: {offset: offset, limit: limit}
-      }).then(response => {
-        this.likedSongs = response.data
-        this.offset = offset
-        this.limit = limit
-      })
-    },
-
-    removeSongs(songIds) {
-      if (!this.checkAuthorization()) {
-        this.$bvModal.msgBoxOk('Something went wrong while authenticating! Try logging out and loggin in again!', {
-          title: 'Error', okVariant: 'danger'
-        })
-      }
-
-      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete everything.', {
-        title: 'Error', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
-      }).then(value => {
-        if (value) {
-          const songsString = songIds.join()
-          this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_songs', { // TODO post request
-            withCredentials: true,
-            params: {ids: songsString}
-          }).then(() => {
-            this.selectedSongs = []
-            this.getSongs(this.offset, this.limit)
-            this.$bvModal.msgBoxOk('Successfully removed songs from Liked Songs!', {
-              title: 'Success', okVariant: 'success'
-            })
-          })
-        }
-      })
-    },
-
     selectSong(songId) {
       if (this.selectedSongs.includes(songId)) {
         this.selectedSongs.splice(this.selectedSongs.indexOf(songId), 1)
@@ -121,14 +82,53 @@ export default {
     openSelectPlaylistsModal() {
       if (!this.selectedSongs.length) {
         this.$bvModal.msgBoxOk('Please select at least one song!', {
-          title: 'Error', size: 'sm', buttonSize: 'sm', okVariant: 'danger', centered: true
+          title: 'Error', size: 'sm', buttonSize: 'sm', okVariant: 'danger'
         })
       } else {
         this.$bvModal.show('add-songs-to-playlist-modal')
       }
     },
 
-    addSongsToPlaylist(playlistIds) {
+    async getSongs(offset, limit) {
+      if (offset < 0) offset = 0
+      if (offset >= this.likedSongs.total) return
+      if (limit < this.songsPerPage) limit = this.songsPerPage
+
+      this.$axios.get("http://127.0.0.1:8000/spotifyapi/songs", {
+        withCredentials: true,
+        params: {offset: offset, limit: limit}
+      }).then(response => {
+        this.likedSongs = response.data
+        this.offset = offset
+        this.limit = limit
+      }).catch(error => this.createErrorDialog(error.response.status))
+    },
+
+    async removeSongs(songIds) {
+      this.$bvModal.msgBoxConfirm('Are you sure you want to remove all selected songs from your Liked Songs?', {
+        title: 'Please Confirm', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
+      }).then(value => {
+            if (value) {
+              const songsString = songIds.join()
+              this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_songs', { // TODO post request
+                withCredentials: true,
+                params: {ids: songsString}
+              }).then(() => {
+                    this.selectedSongs = []
+                    this.getSongs(this.offset, this.limit)
+                    this.$bvModal.msgBoxOk('Successfully removed songs from Liked Songs!', {
+                      title: 'Success', okVariant: 'success'
+                    })
+                  }
+              ).catch(error => this.createErrorDialog(error.response.status))
+            }
+          }
+      )
+    },
+
+    async addSongsToPlaylist(playlistIds) {
+      if (!await this.checkAuthorization(false)) return
+
       const playlistString = playlistIds.join()
       const songsString = this.selectedSongs.join()
       this.$axios.get('http://127.0.0.1:8000/spotifyapi/add_songs_to_playlists', { // TODO post request
@@ -142,7 +142,7 @@ export default {
         this.$bvModal.msgBoxOk('Successfully added songs to the playlists!', {
           title: 'Success', okVariant: 'success'
         })
-      })
+      }).catch(error => this.createErrorDialog(error.response.status))
     }
   }
 }
