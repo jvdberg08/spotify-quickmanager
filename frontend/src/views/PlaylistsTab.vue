@@ -1,5 +1,5 @@
 <template>
-  <b-row>
+  <b-row v-if="this.$store.getters.checkAuthorization">
     <b-col class="py-3 px-0 px-sm-5">
 
       <b-row class="text-center" align-h="center">
@@ -30,7 +30,8 @@
 </template>
 
 <script>
-import ApiInterface from "../mixins/api-interface"
+import util from "@/mixins/util"
+
 import Playlist from "@/components/Playlist";
 import MenuButton from "@/components/MenuButton"
 import MenuDropdownButton from "@/components/MenuDropdownButton"
@@ -38,7 +39,7 @@ import MenuDropdownButton from "@/components/MenuDropdownButton"
 export default {
 
   name: "PlaylistsTab",
-  mixins: [ApiInterface],
+  mixins: [util],
 
   components: {
     Playlist,
@@ -58,16 +59,17 @@ export default {
   },
 
   async beforeMount() {
-    if (await this.checkAuthorization(true)) {
-      await this.getPlaylists(this.offset, this.limit)
+    if (this.$store.getters.checkAuthorization) {
+      this.getPlaylists(this.offset, this.limit)
     }
   },
 
   methods: {
-    async getPlaylists(offset, limit) {
-      if (!await this.checkAuthorization(false)) return
-
-      this.playlists = []
+    getPlaylists(offset, limit) {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
 
       if (offset < 0) offset = 0
       if (offset >= this.playlists.total) return
@@ -83,11 +85,14 @@ export default {
       }).catch(error => this.createErrorDialog(error.response.status))
     },
 
-    async unfollowPlaylists() {
-      if (!await this.checkAuthorization(false)) return
+    unfollowPlaylists() {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
 
       const playlistsString = this.selectedPlaylists.join()
-      this.$axios.get('http://127.0.0.1:8000/spotifyapi/unfollow_playlists', { // TODO post request
+      this.$axios.get("http://127.0.0.1:8000/spotifyapi/unfollow_playlists", { // TODO post request
         withCredentials: true,
         params: {ids: playlistsString}
       }).then(() => {
@@ -108,54 +113,5 @@ export default {
 </script>
 
 <style scoped>
-.song-menu-button {
-  min-height: 100%;
-  width: 10vw;
-  min-width: 100px;
-}
 
-.playlists-headers {
-  border-bottom: black 1px solid;
-}
-
-.playlists-headers div {
-  font-size: 24px;
-  text-align: left;
-}
-
-.playlist-container {
-  border-bottom: black 1px solid;
-}
-
-.playlist-image {
-  height: 48px;
-  width: 48px;
-  border-radius: 8px;
-  border: black 1px solid;
-}
-
-.playlist-public {
-  height: 32px;
-  width: 32px;
-}
-
-.playlist-select div {
-  padding-left: 5.25vw;
-}
-
-.playlist-big {
-  font-size: 24px;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-.playlist-small {
-  font-size: 18px;
-  margin-top: auto;
-  margin-bottom: auto;
-}
 </style>

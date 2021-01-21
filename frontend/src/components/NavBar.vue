@@ -19,7 +19,7 @@
           </b-row>
         </b-col>
         <b-col class="pt-3 p-md-0 mb-3 m-md-0" align-self="center" md="2" xl="3" offset="0" offset-xl="0">
-          <a v-if="isAuthorized" @click="this.clearAuthorization" class="logout-button">Log Out</a>
+          <a v-if="this.$store.getters.checkAuthorization" @click="logout" class="logout-button">Log Out</a>
           <a v-else class="login-button" href="http://127.0.0.1:8000/spotifyauth/authorize">Log In</a>
         </b-col>
       </b-row>
@@ -32,15 +32,20 @@
 </template>
 
 <script>
-import ApiInterface from "@/mixins/api-interface"
+import util from "@/mixins/util";
 
 export default {
   name: "NavBar",
-  mixins: [ApiInterface],
+  mixins: [util],
 
-  beforeMount() {
-    this.checkAuthorization(true)
-  },
+  methods: {
+    logout() {
+      this.$axios.get('http://127.0.0.1:8000/spotifyauth/un_authorize', {
+        withCredentials: true
+      }).then(() => this.$store.commit('clearAuthorization'))
+          .catch(error => this.createErrorDialog(error.response.status))
+    }
+  }
 }
 </script>
 
@@ -100,7 +105,6 @@ export default {
   color: #000000;
 }
 
-/*noinspection CssUnusedSymbol*/
 .router-link-exact-active {
   color: #000000;
 }

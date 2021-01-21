@@ -1,13 +1,12 @@
 <template>
   <b-modal :id="id" :title="title" size="xl" @ok="confirmSelection">
     <b-container fluid="">
-
-      <b-row class="text-center">
-        <MenuButton container-size="col-6"
+      <b-row class="text-center justify-content-center">
+        <MenuButton container-size="col-6 col-lg-3"
                     button-text="Previous" button-size="lg"
                     @clicked="getPlaylists(offset - songsPerPage, limit)"/>
 
-        <MenuButton container-size="col-6"
+        <MenuButton container-size="col-6 col-lg-3"
                     button-text="Next" button-size="lg"
                     @clicked="getPlaylists(offset + songsPerPage, limit)"/>
       </b-row>
@@ -24,14 +23,15 @@
 </template>
 
 <script>
+import util from "@/mixins/util"
+
 import MenuButton from "@/components/MenuButton";
-import ApiInterface from "@/mixins/api-interface"
 import Playlist from "@/components/Playlist";
 
 export default {
 
   name: "SelectPlaylistModal",
-  mixins: [ApiInterface],
+  mixins: [util],
 
   components: {
     MenuButton,
@@ -55,16 +55,18 @@ export default {
   },
 
   async beforeMount() {
-    if (await this.checkAuthorization(true)) {
+    if (this.$store.getters.checkAuthorization) {
       await this.getPlaylists(this.offset, this.limit)
     }
   },
 
   methods: {
     async getPlaylists(offset, limit) {
-      if (!await this.checkAuthorization(false)) return
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
 
-      this.playlists = []
 
       if (offset < 0) offset = 0
       if (offset >= this.playlists.total) return

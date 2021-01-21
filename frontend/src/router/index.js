@@ -6,6 +6,8 @@ import PlaylistsTab from "@/views/PlaylistsTab";
 import AlbumsTab from "@/views/AlbumsTab";
 import ArtistsTab from "@/views/ArtistsTab";
 
+import store from "@/store";
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -17,22 +19,18 @@ const routes = [
     },
     {
         path: '/playlists',
-        name: 'playlists',
         component: PlaylistsTab
     },
     {
         path: '/albums',
-        name: 'albums',
         component: AlbumsTab
     },
     {
         path: '/artists',
-        name: 'artists',
         component: ArtistsTab
     },
     {
         path: '',
-        name: 'NotFoundRedirect',
         redirect: {name: 'songs'}
     }
 ]
@@ -42,5 +40,12 @@ const router = new VueRouter({
     base: process.env.BASE_URL,
     routes
 });
+
+router.afterEach((to) => {
+    if ('authExpiry' in to.query) {
+        store.commit('setAuthorization', to.query.authExpiry)
+        router.push(to.path).then()
+    }
+})
 
 export default router
