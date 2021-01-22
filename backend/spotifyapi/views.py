@@ -175,3 +175,27 @@ def replace_playlist(request):
 
     status = max(set(error_codes), key=error_codes.count) if error_codes else 200
     return HttpResponse(status=status)
+
+
+def playlist_songs(request):
+    auth_check = check_authorization(request)
+    if auth_check.status_code != 200:
+        return HttpResponse(status=auth_check.status_code)
+
+    authorization = make_auth(request)
+    playlist_id = request.GET.get('playlistId')
+    json_response = dict()
+
+    counter = 0
+    while True:
+        response = requests.get(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?offset=' + counter * 100, headers=authorization)
+        if response.status_code != 200:
+            return HttpResponse(status=response.status_code)
+        counter += 1
+        json_response['total'] = response.json()['total']
+        json_response['items'] += response.json()['items']
+
+        if counter * 100 > json_response['total']:
+            break
+
+    return JsonResponse(data=json_response)
