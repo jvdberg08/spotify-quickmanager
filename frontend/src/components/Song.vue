@@ -1,23 +1,20 @@
 <template>
-  <b-col v-bind:class="{ 'song-container-is-selected': isSelected }"
+  <b-col :class="{ 'song-container-is-selected': isSelected }"
          class="song-container p-3">
 
-    <b-row>
-      <b-col cols="2" class="song-image-container">
-        <b-img :src="song.track.album.images[2].url"/>
-      </b-col>
+    <div class="float-left song-image-container">
+      <b-img :src="song.track.album.images[2].url"/>
+    </div>
 
-      <b-col cols="8" class="pl-4">
+    <b-row>
+      <b-col cols="11">
         <b-row>
-          <b-col class="song-name">
-            <strong> {{ song.track.name }}</strong>
-          </b-col>
+          <b-col cols="12" class="song-name"><strong>{{ song.track.name }}</strong></b-col>
+          <b-col cols="12" class="song-artists">{{ song.track.artists.map(artist => artist.name).join(', ') }}</b-col>
         </b-row>
-        <b-row>
-          <b-col class="song-artists">
-            {{ getArtistString(song) }}
-          </b-col>
-        </b-row>
+      </b-col>
+      <b-col v-if="withHandle" class="p-0 pr-3" cols="1">
+        <b-icon class="h2 float-right mt-3" icon="list"/>
       </b-col>
     </b-row>
   </b-col>
@@ -29,22 +26,8 @@ export default {
 
   props: {
     song: Object,
-    isSelected: Boolean
-  },
-
-  methods: {
-    getArtistString(songJson) {
-      let artistString = ""
-      for (let i = 0; i < songJson.track.artists.length; i++) {
-        const artistJson = songJson.track.artists[i]
-        if (artistString === "") {
-          artistString = artistJson.name
-        } else {
-          artistString = artistString + ", " + artistJson.name
-        }
-      }
-      return artistString;
-    }
+    isSelected: Boolean,
+    withHandle: Boolean
   }
 }
 </script>
@@ -81,6 +64,8 @@ export default {
 
 .song-image-container {
   max-width: 64px;
+  max-height: 64px;
+  /*float: left;*/
 }
 
 .song-image-container img {

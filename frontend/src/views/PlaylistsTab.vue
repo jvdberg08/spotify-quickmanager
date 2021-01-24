@@ -1,11 +1,17 @@
 <template>
   <b-row v-if="this.$store.getters.checkAuthorization">
+    <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"
+                       :title="'Add Selected Songs to Playlist'"/>
+    <b-btn @click="this.openEditPlaylistModal">
+      LOLOLOL
+    </b-btn>
+
     <b-col class="py-3 px-0 px-sm-5">
 
       <b-row class="text-center" align-h="center">
         <MenuButton container-size="col-4 col-sm-3 col-md-2"
                     button-text="Previous" button-size="lg"
-                    v-on:clicked="getPlaylists(offset - songsPerPage, limit)"/>
+                    v-on:clicked="getPlaylists(offset - playlistsPerPage, limit)"/>
 
         <MenuDropdownButton container-size="col-4 col-sm-3 col-md-2"
                             button-text="Actions" button-size="lg" button-variant="primary">
@@ -15,13 +21,13 @@
 
         <MenuButton container-size="col-4 col-sm-3 col-md-2"
                     button-text="Next" button-size="lg"
-                    v-on:clicked="getPlaylists(offset + songsPerPage, limit)"/>
+                    v-on:clicked="getPlaylists(offset + playlistsPerPage, limit)"/>
       </b-row>
 
       <b-row class="px-5 py-3">
         <b-col class="p-2" cols="12" lg="4" xl="3" v-for="playlist in playlists.items" :key="String(playlist.id)"
-               v-on:click="selectPlaylist(playlist.id)">
-          <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist.id)"/>
+               v-on:click="selectPlaylist(playlist)">
+          <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
         </b-col>
       </b-row>
 
@@ -35,6 +41,7 @@ import util from "@/mixins/util"
 import Playlist from "@/components/Playlist";
 import MenuButton from "@/components/MenuButton"
 import MenuDropdownButton from "@/components/MenuDropdownButton"
+import EditPlaylistModal from "@/views/EditPlaylistModal";
 
 export default {
 
@@ -44,14 +51,15 @@ export default {
   components: {
     Playlist,
     MenuButton,
-    MenuDropdownButton
+    MenuDropdownButton,
+    EditPlaylistModal
   },
 
   data() {
     return {
       offset: 0,
       limit: 10,
-      songsPerPage: 10,
+      playlistsPerPage: 10,
 
       playlists: [],
       selectedPlaylists: []
@@ -65,6 +73,21 @@ export default {
   },
 
   methods: {
+    openEditPlaylistModal() {
+      if (!this.$store.getters.checkAuthorization) {
+        this.createErrorDialog(401)
+        return
+      }
+
+      if (this.selectedPlaylists.length !== 1) {
+        this.$bvModal.msgBoxOk('Please select one playlist!', {
+          title: 'Error', size: 'sm', buttonSize: 'sm', okVariant: 'danger'
+        })
+      } else {
+        this.$bvModal.show('edit-playlist-modal')
+      }
+    },
+
     getPlaylists(offset, limit) {
       if (!this.$store.getters.checkAuthorization) {
         this.createErrorDialog(401)
@@ -91,7 +114,7 @@ export default {
         return
       }
 
-      const playlistsString = this.selectedPlaylists.join()
+      const playlistsString = this.selectedPlaylists.map(playlist => playlist.id).join()
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/unfollow_playlists", { // TODO post request
         withCredentials: true,
         params: {ids: playlistsString}
@@ -101,11 +124,11 @@ export default {
       }).catch(error => this.createErrorDialog(error.response.status))
     },
 
-    selectPlaylist(playlistId) {
-      if (this.selectedPlaylists.includes(playlistId)) {
-        this.selectedPlaylists.splice(this.selectedPlaylists.indexOf(playlistId), 1)
+    selectPlaylist(playlist) {
+      if (this.selectedPlaylists.includes(playlist)) {
+        this.selectedPlaylists.splice(this.selectedPlaylists.indexOf(playlist), 1)
       } else {
-        this.selectedPlaylists.push(playlistId)
+        this.selectedPlaylists.push(playlist)
       }
     }
   }
