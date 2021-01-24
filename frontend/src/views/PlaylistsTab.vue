@@ -32,10 +32,9 @@
 <script>
 import util from "@/mixins/util"
 
-import Playlist from "@/components/Playlist";
+import Playlist from "@/components/Playlist"
 import MenuButton from "@/components/MenuButton"
 import MenuDropdownButton from "@/components/MenuDropdownButton"
-import EditPlaylistModal from "@/views/EditPlaylistModal";
 
 export default {
 
@@ -45,8 +44,7 @@ export default {
   components: {
     Playlist,
     MenuButton,
-    MenuDropdownButton,
-    EditPlaylistModal
+    MenuDropdownButton
   },
 
   data() {
