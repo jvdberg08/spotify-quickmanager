@@ -138,6 +138,29 @@ def edit_playlist(request):
     return HttpResponse(status=response.status_code)
 
 
+def edit_playlists(request):
+    auth_check = check_authorization(request)
+    if auth_check.status_code != 200:
+        return HttpResponse(status=auth_check.status_code)
+
+    headers = make_auth(request)
+    headers['Content-Type'] = 'application/json'
+    playlist_ids = request.GET.get('playlistIds')
+    playlist_ids = playlist_ids.split(',')
+
+    for playlist_id in playlist_ids:
+        values = playlist_id.split(':')
+        playlist_id = values[0]
+        public = values[1] == 'true'
+        collaborative = values[2] == 'true'
+        response = requests.put(url=SPOTIFY_API_URL + '/playlists/' + playlist_id, json={'public': public, 'collaborative': collaborative},
+                                headers=headers)
+        if response.status_code != 200:
+            return HttpResponse(status=response.status_code)
+
+    return HttpResponse(status=200)
+
+
 def replace_playlist(request):
     auth_check = check_authorization(request)
     if auth_check.status_code != 200:
