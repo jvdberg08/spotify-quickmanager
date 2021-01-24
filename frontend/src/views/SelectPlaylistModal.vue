@@ -4,11 +4,11 @@
       <b-row class="text-center justify-content-center">
         <MenuButton container-size="col-6 col-lg-3"
                     button-text="Previous" button-size="lg"
-                    @clicked="getPlaylists(offset - songsPerPage, limit)"/>
+                    @clicked="getPlaylists(offset - playlistsPerPage, limit)"/>
 
         <MenuButton container-size="col-6 col-lg-3"
                     button-text="Next" button-size="lg"
-                    @clicked="getPlaylists(offset + songsPerPage, limit)"/>
+                    @clicked="getPlaylists(offset + playlistsPerPage, limit)"/>
       </b-row>
 
       <b-row class="px-5 mx-5 pt-3">
@@ -47,26 +47,25 @@ export default {
     return {
       offset: 0,
       limit: 10,
-      songsPerPage: 10,
+      playlistsPerPage: 10,
 
       playlists: [],
       selectedPlaylists: []
     }
   },
 
-  async beforeMount() {
+  beforeMount() {
     if (this.$store.getters.checkAuthorization) {
-      await this.getPlaylists(this.offset, this.limit)
+      this.getPlaylists(this.offset, this.limit)
     }
   },
 
   methods: {
-    async getPlaylists(offset, limit) {
+    getPlaylists(offset, limit) {
       if (!this.$store.getters.checkAuthorization) {
         this.createErrorDialog(401)
         return
       }
-
 
       if (offset < 0) offset = 0
       if (offset >= this.playlists.total) return
