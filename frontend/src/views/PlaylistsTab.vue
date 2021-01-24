@@ -1,11 +1,5 @@
 <template>
   <b-row v-if="this.$store.getters.checkAuthorization">
-    <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"
-                       :title="'Add Selected Songs to Playlist'"/>
-    <b-btn @click="this.openEditPlaylistModal">
-      LOLOLOL
-    </b-btn>
-
     <b-col class="py-3 px-0 px-sm-5">
 
       <b-row class="text-center" align-h="center">
