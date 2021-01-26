@@ -106,8 +106,7 @@ export default {
       if (limit < this.songsPerPage) limit = this.songsPerPage
 
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/songs", {
-        withCredentials: true,
-        params: {offset: offset, limit: limit}
+        params: {offset: offset, limit: limit},
       }).then(response => {
         this.likedSongs = response.data
         this.offset = offset
@@ -125,10 +124,8 @@ export default {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
       }).then(value => {
             if (value) {
-              const songsString = songIds.join()
-              this.$axios.get('http://127.0.0.1:8000/spotifyapi/delete_songs', { // TODO post request
-                withCredentials: true,
-                params: {ids: songsString}
+              this.$axios.delete('http://127.0.0.1:8000/spotifyapi/delete_songs', {
+                data: JSON.stringify({ids: songIds.join()})
               }).then(() => {
                     this.selectedSongs = []
                     this.getSongs(this.offset, this.limit)
@@ -150,8 +147,7 @@ export default {
 
       const playlistString = playlistIds.join()
       const songsString = this.selectedSongs.join()
-      this.$axios.get('http://127.0.0.1:8000/spotifyapi/add_songs_to_playlists', { // TODO post request
-        withCredentials: true,
+      this.$axios.post('http://127.0.0.1:8000/spotifyapi/add_songs_to_playlists', null, {
         params: {
           'songIds': songsString,
           'playlistIds': playlistString

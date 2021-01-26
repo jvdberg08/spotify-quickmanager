@@ -6,17 +6,10 @@ SECRET_KEY = 'django_secret_key_here'
 
 DEBUG = True
 
-SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_HTTPONLY = False
-SESSION_COOKIE_SAMESITE = False
-CSRF_USE_SESSIONS = False
-CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = False
-
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = True
-
-# ALLOWED_HOSTS = ['*']
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8080"
+]
 
 SESSION_COOKIE_AGE = 259200
 
@@ -36,6 +29,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'spotifyquickmanager.middleware.HttpPostTunnelingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

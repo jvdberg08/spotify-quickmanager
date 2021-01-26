@@ -1,5 +1,4 @@
 import base64
-import json
 from time import time
 from urllib import parse
 
@@ -7,6 +6,7 @@ import requests
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.conf import settings
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 CLIENT_ID = 'client_id_here'
 CLIENT_SECRET = 'client_secret_here'
@@ -63,6 +63,7 @@ def refresh(request):
     return HttpResponse(status=200)
 
 
+@ensure_csrf_cookie
 def authorize(request):
     payload = {
         'client_id': CLIENT_ID,

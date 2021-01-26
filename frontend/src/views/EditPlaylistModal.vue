@@ -147,7 +147,7 @@ export default {
         return
       }
 
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/remove_playlist_songs", {
+      this.$axios.delete("http://127.0.0.1:8000/spotifyapi/remove_playlist_songs", {
         withCredentials: true,
         params: {
           playlistId: this.playlist.id,
@@ -167,7 +167,7 @@ export default {
         return
       }
 
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/edit_playlist", {
+      this.$axios.put("http://127.0.0.1:8000/spotifyapi/edit_playlist", {
         withCredentials: true,
         params: {
           playlistId: this.playlist.id,
@@ -177,7 +177,7 @@ export default {
           collaborative: this.checkboxes.collaborative
         }
       }).then(() => {
-        this.$axios.get("http://127.0.0.1:8000/spotifyapi/replace_playlist", {
+        this.$axios.put("http://127.0.0.1:8000/spotifyapi/replace_playlist", {
           withCredentials: true,
           params: {
             playlistId: this.playlist.id,

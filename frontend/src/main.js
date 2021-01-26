@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 
 import {BootstrapVue, BootstrapVueIcons} from 'bootstrap-vue';
-import Axios from 'axios'
+import axios from 'axios'
 
 import router from './router'
 import store from './store'
@@ -13,7 +13,10 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 
-Vue.prototype.$axios = Axios
+Vue.prototype.$axios = axios
+axios.defaults.withCredentials = true
+axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+axios.defaults.xsrfCookieName = 'csrftoken'
 Vue.config.productionTip = false
 
 new Vue({
