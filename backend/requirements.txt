@@ -1,9 +1,9 @@
 asgiref==3.3.1
 certifi==2020.12.5
 chardet==4.0.0
-Django==3.1.5
+Django==3.2a1
 django-cors-headers==3.7.0
-idna==3.1
+idna==2.9
 pytz==2020.5
 requests==2.25.1
 sqlparse==0.4.1
