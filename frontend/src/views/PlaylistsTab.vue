@@ -131,7 +131,7 @@ export default {
             if (type === 'Public/Private') return playlist.id + ':' + !playlist.public + ':' + playlist.collaborative
             else if (type === 'Collaborative/Non-Collaborative') return playlist.id + ':' + playlist.public + ':' + !playlist.collaborative
           }).join()
-          this.$axios.get("http://127.0.0.1:8000/spotifyapi/edit_playlists", {
+          this.$axios.put("http://127.0.0.1:8000/spotifyapi/edit_playlists", null, {
             withCredentials: true,
             params: {playlistIds: playlistsString}
           }).then(() => {
@@ -174,7 +174,7 @@ export default {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Unfollow', cancelTitle: 'Cancel'
       }).then(() => {
         const playlistsString = this.selectedPlaylists.map(playlist => playlist.id).join()
-        this.$axios.get("http://127.0.0.1:8000/spotifyapi/unfollow_playlists", {
+        this.$axios.delete("http://127.0.0.1:8000/spotifyapi/unfollow_playlists", {
           withCredentials: true,
           params: {ids: playlistsString}
         }).then(() => {

@@ -45,7 +45,7 @@ def delete_songs(request):
         return HttpResponse(status=auth_check.status_code)
 
     authorization = make_auth(request)
-    song_ids = request.GET.get(key='ids')
+    song_ids = request.DELETE.get(key='ids')
 
     response = requests.delete(SPOTIFY_API_URL + '/me/tracks?ids=' + song_ids, headers=authorization)
     return HttpResponse(status=response.status_code)
@@ -73,7 +73,7 @@ def unfollow_playlists(request):
         return HttpResponse(status=auth_check.status_code)
 
     authorization = make_auth(request)
-    playlist_ids = request.GET.get(key='ids', default='')
+    playlist_ids = request.DELETE.get(key='ids', default='')
     playlist_ids = playlist_ids.split(',')
 
     error_codes = []
@@ -92,9 +92,9 @@ def add_songs_to_playlists(request):
         return HttpResponse(status=auth_check.status_code)
 
     authorization = make_auth(request)
-    song_ids = request.GET.get(key='songIds')
+    song_ids = request.POST.get(key='songIds')
     song_ids = ','.join('spotify:track:' + song_id for song_id in song_ids.split(','))
-    playlist_ids = request.GET.get(key='playlistIds')
+    playlist_ids = request.POST.get(key='playlistIds')
     playlist_ids = playlist_ids.split(',')
 
     error_codes = []
@@ -115,11 +115,11 @@ def edit_playlist(request):
 
     headers = make_auth(request)
     headers['Content-Type'] = 'application/json'
-    playlist_id = request.GET.get(key='playlistId')
-    name = request.GET.get('name')
-    description = request.GET.get('description')
-    public = request.GET.get('public')
-    collaborative = request.GET.get('collaborative')
+    playlist_id = request.PUT.get(key='playlistId')
+    name = request.PUT.get('name')
+    description = request.PUT.get('description')
+    public = request.PUT.get('public')
+    collaborative = request.PUT.get('collaborative')
 
     if not name and not description and not public and not collaborative:
         return HttpResponse(status=400)
@@ -145,7 +145,7 @@ def edit_playlists(request):
 
     headers = make_auth(request)
     headers['Content-Type'] = 'application/json'
-    playlist_ids = request.GET.get('playlistIds')
+    playlist_ids = request.PUT.get('playlistIds')
     playlist_ids = playlist_ids.split(',')
 
     for playlist_id in playlist_ids:
@@ -167,8 +167,8 @@ def replace_playlist(request):
         return HttpResponse(status=auth_check.status_code)
 
     authorization = make_auth(request)
-    playlist_id = request.GET.get('playlistId')
-    song_ids = request.GET.get('songIds')
+    playlist_id = request.PUT.get('playlistId')
+    song_ids = request.PUT.get('songIds')
     song_ids = song_ids.split(',')
 
     request_ids = []
@@ -233,8 +233,8 @@ def remove_playlist_songs(request):
 
     headers = make_auth(request)
     headers['Content-Type'] = 'application/json'
-    playlist_id = request.GET.get('playlistId')
-    song_ids = request.GET.get('songIds')
+    playlist_id = request.DELETE.get('playlistId')
+    song_ids = request.DELETE.get('songIds')
     song_ids = song_ids.split(',')
 
     data = {'tracks': []}
