@@ -11,12 +11,12 @@
                     @clicked="goToPage(page + 1)"/>
       </b-row>
 
-      <b-row class="px-5 mx-5 pt-3">
+      <DataContainer :class="'px-5 mx-5 pt-3'" :is-loading="isLoading">
         <b-col class="p-2" cols="12" v-for="playlist in shownPlaylists" :key="String(playlist.id)"
                @click="selectPlaylist(playlist.id)">
           <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist.id)"/>
         </b-col>
-      </b-row>
+      </DataContainer>
 
     </b-container>
   </b-modal>
@@ -27,6 +27,7 @@ import util from "@/mixins/util"
 
 import MenuButton from "@/components/MenuButton";
 import Playlist from "@/components/Playlist";
+import DataContainer from "@/components/DataContainer";
 
 export default {
 
@@ -34,6 +35,7 @@ export default {
   mixins: [util],
 
   components: {
+    DataContainer,
     MenuButton,
     Playlist
   },
@@ -45,6 +47,8 @@ export default {
 
   data() {
     return {
+      isLoading: false,
+
       page: 0,
       itemsPerPage: 5,
 
@@ -81,9 +85,14 @@ export default {
         return
       }
 
+      this.isLoading = true
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists").then(response => {
         this.playlists = response.data
-      }).catch(error => this.createErrorDialog(error.response.status))
+        this.isLoading = false
+      }).catch(error => {
+        this.createErrorDialog(error.response.status)
+        this.isLoading = false
+      })
     },
 
     selectPlaylist(playlistId) {

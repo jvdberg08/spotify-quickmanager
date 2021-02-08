@@ -25,12 +25,12 @@
                     v-on:clicked="goToPage(page + 1)"/>
       </b-row>
 
-      <b-row class="px-5 py-3">
+      <DataContainer :class="'px-5 py-3'" :is-loading="isLoading">
         <b-col class="p-2" cols="12" lg="4" xl="3" v-for="playlist in playlists.items" :key="String(playlist.id)"
                v-on:click="selectPlaylist(playlist)">
           <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
         </b-col>
-      </b-row>
+      </DataContainer>
 
     </b-col>
   </b-row>
@@ -43,6 +43,7 @@ import Playlist from "@/components/Playlist"
 import MenuButton from "@/components/MenuButton"
 import MenuDropdownButton from "@/components/MenuDropdownButton"
 import EditPlaylistModal from "@/views/EditPlaylistModal";
+import DataContainer from "@/components/DataContainer";
 
 export default {
 
@@ -50,6 +51,7 @@ export default {
   mixins: [util],
 
   components: {
+    DataContainer,
     Playlist,
     MenuButton,
     MenuDropdownButton,
@@ -58,6 +60,8 @@ export default {
 
   data() {
     return {
+      isLoading: false,
+
       page: 0,
       itemsPerPage: 28,
 
@@ -109,9 +113,14 @@ export default {
         return
       }
 
+      this.isLoading = true
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists").then(response => {
         this.playlists = response.data
-      }).catch(error => this.createErrorDialog(error.response.status))
+        this.isLoading = false
+      }).catch(error => {
+        this.createErrorDialog(error.response.status)
+        this.isLoading = false
+      })
     },
 
     editPlaylist(type) {
