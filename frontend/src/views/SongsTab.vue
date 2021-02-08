@@ -8,11 +8,11 @@
       <b-row class="text-center" align-h="center">
         <MenuButton container-size="col-4 col-sm-3 col-md-2"
                     button-text="Previous" button-size="lg"
-                    v-on:clicked="getSongs(offset - songsPerPage, limit)"/>
+                    v-on:clicked="goToPage(page - 1)"/>
 
         <MenuDropdownButton container-size="col-4 col-sm-3 col-md-2"
                             button-text="Actions" button-size="lg" button-variant="primary">
-          <b-dropdown-item @click="getSongs(offset, limit)">Refresh</b-dropdown-item>
+          <b-dropdown-item @click="getSongs">Refresh</b-dropdown-item>
           <b-dropdown-item @click="openSelectPlaylistsModal">Add Selected To Playlist
           </b-dropdown-item>
           <b-dropdown-item @click="removeSongs(selectedSongs)">Remove Selected from Liked Songs</b-dropdown-item>
@@ -20,11 +20,11 @@
 
         <MenuButton container-size="col-4 col-sm-3 col-md-2"
                     button-text="Next" button-size="lg"
-                    v-on:clicked="getSongs(offset + songsPerPage, limit)"/>
+                    v-on:clicked="goToPage(page + 1)"/>
       </b-row>
 
       <b-row class="px-5 py-3">
-        <b-col class="p-2" cols="12" lg="4" xl="3" v-for="song in likedSongs.items" :key="String(song.track.id)"
+        <b-col class="p-2" cols="12" lg="4" xl="3" v-for="song in shownSongs" :key="String(song.track.id)"
                v-on:click="selectSong(song.track.id)">
           <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)"/>
         </b-col>
@@ -56,9 +56,8 @@ export default {
 
   data() {
     return {
-      offset: 0,
-      limit: 28,
-      songsPerPage: 28,
+      page: 0,
+      itemsPerPage: 28,
 
       likedSongs: [],
       selectedSongs: [],
@@ -71,7 +70,22 @@ export default {
     }
   },
 
+  computed: {
+    shownSongs: function () {
+      if (this.likedSongs.items !== undefined) {
+        return this.likedSongs.items.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
+      }
+      return []
+    }
+  },
+
   methods: {
+    goToPage(newPage) {
+      if (newPage >= 0 && newPage * this.itemsPerPage < this.likedSongs.total) {
+        this.page = newPage
+      }
+    },
+
     selectSong(songId) {
       if (this.selectedSongs.includes(songId)) {
         this.selectedSongs.splice(this.selectedSongs.indexOf(songId), 1)
@@ -95,22 +109,14 @@ export default {
       }
     },
 
-    getSongs(offset, limit) {
+    getSongs() {
       if (!this.$store.getters.checkAuthorization) {
         this.createErrorDialog(401)
         return
       }
 
-      if (offset < 0) offset = 0
-      if (offset >= this.likedSongs.total) return
-      if (limit < this.songsPerPage) limit = this.songsPerPage
-
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/songs", {
-        params: {offset: offset, limit: limit},
-      }).then(response => {
+      this.$axios.get("http://127.0.0.1:8000/spotifyapi/liked_songs").then(response => {
         this.likedSongs = response.data
-        this.offset = offset
-        this.limit = limit
       }).catch(error => this.createErrorDialog(error.response.status))
     },
 
@@ -124,8 +130,8 @@ export default {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
       }).then(value => {
             if (value) {
-              this.$axios.delete('http://127.0.0.1:8000/spotifyapi/delete_songs', {
-                data: JSON.stringify({ids: songIds.join()})
+              this.$axios.delete('http://127.0.0.1:8000/spotifyapi/liked_songs', {
+                params: {tracks: songIds.join()}
               }).then(() => {
                     this.selectedSongs = []
                     this.getSongs(this.offset, this.limit)
@@ -147,12 +153,9 @@ export default {
 
       const playlistString = playlistIds.join()
       const songsString = this.selectedSongs.join()
-      this.$axios.post('http://127.0.0.1:8000/spotifyapi/add_songs_to_playlists', null, {
-        params: {
-          'songIds': songsString,
-          'playlistIds': playlistString
-        }
-      }).then(() => {
+      this.$axios.post('http://127.0.0.1:8000/spotifyapi/playlists/tracks',
+          {tracks: songsString},
+          {params: {playlists: playlistString}}).then(() => {
         this.selectedSongs = []
         this.$bvModal.msgBoxOk('Successfully added songs to the playlists!', {
           title: 'Success', okVariant: 'success'

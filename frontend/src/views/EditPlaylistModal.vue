@@ -97,7 +97,7 @@ export default {
             title: 'Error', okVariant: 'danger'
           }).then(() => {
             this.checkboxes.isPublic = this.playlist.public
-            this.checkbox.collaborative = this.playlist.collaborative
+            this.checkboxes.collaborative = this.playlist.collaborative
           })
         }
       },
@@ -107,8 +107,8 @@ export default {
 
   mounted() {
     this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-      this.songs = []
       if (modalId === this.id) {
+        this.songs = []
         this.getSongs()
         this.name = this.playlist.name
         this.description = this.playlist.description
@@ -125,9 +125,8 @@ export default {
         return
       }
 
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlist_songs", {
-        withCredentials: true,
-        params: {playlistId: this.playlist.id}
+      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlist/tracks", {
+        params: {playlist: this.playlist.id}
       }).then(response => {
         this.songs = response.data
       }).catch(error => this.createErrorDialog(error.response.status))
@@ -147,11 +146,10 @@ export default {
         return
       }
 
-      this.$axios.delete("http://127.0.0.1:8000/spotifyapi/remove_playlist_songs", {
-        withCredentials: true,
+      this.$axios.delete("http://127.0.0.1:8000/spotifyapi/playlist/tracks", {
         params: {
-          playlistId: this.playlist.id,
-          songIds: this.selectedSongs.join()
+          playlist: this.playlist.id,
+          tracks: this.selectedSongs.join()
         }
       }).then(() => {
         this.getSongs()
@@ -167,23 +165,18 @@ export default {
         return
       }
 
-      this.$axios.put("http://127.0.0.1:8000/spotifyapi/edit_playlist", {
-        withCredentials: true,
-        params: {
-          playlistId: this.playlist.id,
+      this.$axios.put("http://127.0.0.1:8000/spotifyapi/playlists", {
+        playlists: [{
+          id: this.playlist.id,
           name: this.name,
           description: this.description,
           public: this.checkboxes.isPublic,
           collaborative: this.checkboxes.collaborative
-        }
+        }]
       }).then(() => {
-        this.$axios.put("http://127.0.0.1:8000/spotifyapi/replace_playlist", {
-          withCredentials: true,
-          params: {
-            playlistId: this.playlist.id,
-            songIds: this.songs.items.map(song => song.track.id).join()
-          }
-        }).then(() => {
+        this.$axios.put("http://127.0.0.1:8000/spotifyapi/playlist/tracks",
+            {tracks: this.songs.items.map(song => song.track.id).join()},
+            {params: {playlist: this.playlist.id}}).then(() => {
           this.$bvModal.msgBoxOk('Successfully edited playlist!', {
             title: 'Success', okVariant: 'success'
           })
