@@ -1,5 +1,5 @@
 <template>
-  <b-row v-if="this.$store.getters.checkAuthorization">
+  <TabBase require-authorization>
     <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]" :title="'Edit Playlist'"/>
 
     <b-col class="py-3 px-0 px-sm-5">
@@ -33,7 +33,7 @@
       </DataContainer>
 
     </b-col>
-  </b-row>
+  </TabBase>
 </template>
 
 <script>
@@ -44,6 +44,7 @@ import MenuButton from "@/components/MenuButton"
 import MenuDropdownButton from "@/components/MenuDropdownButton"
 import EditPlaylistModal from "@/views/EditPlaylistModal";
 import DataContainer from "@/components/DataContainer";
+import TabBase from "@/views/TabBase";
 
 export default {
 
@@ -51,6 +52,7 @@ export default {
   mixins: [util],
 
   components: {
+    TabBase,
     DataContainer,
     Playlist,
     MenuButton,

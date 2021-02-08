@@ -1,5 +1,5 @@
 <template>
-  <b-row v-if="this.$store.getters.checkAuthorization">
+  <TabBase require-authorization>
     <SelectPlaylistModal :id="'add-songs-to-playlist-modal'" :title="'Add Selected Songs to Playlist'"
                          @ok="addSongsToPlaylist"/>
 
@@ -31,7 +31,7 @@
       </DataContainer>
 
     </b-col>
-  </b-row>
+  </TabBase>
 </template>
 
 <script>
@@ -42,6 +42,7 @@ import MenuButton from "@/components/MenuButton";
 import MenuDropdownButton from "@/components/MenuDropdownButton";
 import SelectPlaylistModal from "@/views/SelectPlaylistModal";
 import DataContainer from "@/components/DataContainer";
+import TabBase from "@/views/TabBase";
 
 export default {
 
@@ -49,6 +50,7 @@ export default {
   mixins: [util],
 
   components: {
+    TabBase,
     Song,
     MenuButton,
     DataContainer,
