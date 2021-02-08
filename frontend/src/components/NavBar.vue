@@ -1,32 +1,27 @@
 <template>
-  <b-row>
-    <b-col>
-      <b-row class="navbar-container">
-        <b-col class="p-0 py-md-3" cols="12" md="10" lg="6" offset="0" offset-lg="3">
-          <b-row class="items-container">
-            <b-col cols="12" md="3">
-              <router-link class="item" to="/songs" replace>Songs</router-link>
-            </b-col>
-            <b-col cols="12" md="3">
-              <router-link class="item" to="/playlists" replace>Playlists</router-link>
-            </b-col>
-            <b-col cols="12" md="3">
-              <router-link class="item" to="/albums" replace>Albums</router-link>
-            </b-col>
-            <b-col cols="12" md="3">
-              <router-link class="item" to="/artists" replace>Artists</router-link>
-            </b-col>
-          </b-row>
+  <b-row class="navbar-container">
+    <b-col class="p-0 py-md-3" cols="12" md="8" offset-md="1" lg="6" offset-lg="3">
+      <b-row class="items-container">
+        <b-col cols="12" md="3">
+          <router-link class="item" to="/songs" replace>Songs</router-link>
         </b-col>
-        <b-col class="pt-3 p-md-0 mb-3 m-md-0" align-self="center" md="2" xl="3" offset="0" offset-xl="0">
-          <a v-if="this.$store.getters.checkAuthorization" @click="logout" class="logout-button">Log Out</a>
-          <a v-else class="login-button" href="http://127.0.0.1:8000/spotifyauth/authorize">Log In</a>
+        <b-col cols="12" md="3">
+          <router-link class="item" to="/playlists" replace>Playlists</router-link>
+        </b-col>
+        <b-col cols="12" md="3">
+          <router-link class="item" to="/albums" replace>Albums</router-link>
+        </b-col>
+        <b-col cols="12" md="3">
+          <router-link class="item" to="/artists" replace>Artists</router-link>
         </b-col>
       </b-row>
-
-      <b-row>
-        <b-col class="mx-4 horizontal-divider"></b-col>
-      </b-row>
+    </b-col>
+    <b-col class="pt-3 p-md-0 mb-3 m-md-0" align-self="center" cols="12" md="2" xl="3">
+      <b-button v-if="this.$store.getters.checkAuthorization" @click="logout"
+                class="logout-button" size="lg" variant="danger">
+        Log Out
+        <img class="logout-icon ml-2 my-auto" src="../../public/log-out.png" alt="Log Out button"/>
+      </b-button>
     </b-col>
   </b-row>
 </template>
@@ -53,46 +48,19 @@ export default {
 
 .navbar-container {
   text-align: center;
-  min-width: 100vw;
-}
-
-.login-button {
-  padding: 0.6vh 2vw;
-  white-space: nowrap;
-
-  text-decoration: none;
-  font-size: 25px;
-
-  border: 2px solid #47D13199;
-  border-radius: 10px;
-  background-color: transparent;
-  color: #47D13199;
-}
-
-.login-button:hover {
-  border-color: #47D131;
-  background-color: transparent;
-  color: #47D131;
+  min-width: 100vw;;
 }
 
 .logout-button {
-  padding: 0.6vh 2vw;
-  white-space: nowrap;
-
-  text-decoration: none;
-  font-size: 25px;
-
-  border: 2px solid #FF1B1BB3;
-  border-radius: 10px;
-  background-color: transparent;
-  color: #FF1B1BB3;
+  min-width: 152px;
+  font-size: 1.4em;
 }
 
-.logout-button:hover {
-  border-color: #FF1B1B;
-  background-color: transparent;
-  color: #FF1B1B;
-  cursor: pointer;
+.logout-icon {
+  height: 24px;
+  width: 24px;
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
 }
 
 .item {
@@ -108,9 +76,4 @@ export default {
 .router-link-exact-active {
   color: #000000;
 }
-
-.horizontal-divider {
-  border: 1px solid #00000099;
-}
-
 </style>
