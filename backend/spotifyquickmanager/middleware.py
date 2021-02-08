@@ -1,7 +1,4 @@
 import json
-from urllib import parse
-
-from django.http import QueryDict
 
 
 class HttpPostTunnelingMiddleware(object):
@@ -10,10 +7,8 @@ class HttpPostTunnelingMiddleware(object):
         self.get_response = get_response
 
     def __call__(self, request):
+        if request.method == 'POST':
+            request.POST = json.loads(request.body)
         if request.method == 'PUT':
-            request.META['REQUEST_METHOD'] = 'PUT'
-            request.PUT = QueryDict(parse.urlencode(json.loads(request.body)))
-        if request.method == 'DELETE':
-            request.META['REQUEST_METHOD'] = 'DELETE'
-            request.DELETE = QueryDict(parse.urlencode(json.loads(request.body)))
+            request.PUT = json.loads(request.body)
         return self.get_response(request)

@@ -7,11 +7,11 @@
       <b-row class="text-center" align-h="center">
         <MenuButton container-size="col-4 col-sm-3 col-md-2"
                     button-text="Previous" button-size="lg"
-                    v-on:clicked="getPlaylists(offset - playlistsPerPage, limit)"/>
+                    v-on:clicked="goToPage(page - 1)"/>
 
         <MenuDropdownButton container-size="col-4 col-sm-3 col-md-2"
                             button-text="Actions" button-size="lg" button-variant="primary">
-          <b-dropdown-item @click="getPlaylists(offset, limit)">Refresh</b-dropdown-item>
+          <b-dropdown-item @click="getPlaylists">Refresh</b-dropdown-item>
           <b-dropdown-item @click="openEditPlaylistModal">Edit</b-dropdown-item>
           <b-dropdown-item @click="unfollowPlaylists">Unfollow</b-dropdown-item>
           <b-dropdown-item @click="editPlaylist('Public/Private')">Make Public/Private</b-dropdown-item>
@@ -22,7 +22,7 @@
 
         <MenuButton container-size="col-4 col-sm-3 col-md-2"
                     button-text="Next" button-size="lg"
-                    v-on:clicked="getPlaylists(offset + playlistsPerPage, limit)"/>
+                    v-on:clicked="goToPage(page + 1)"/>
       </b-row>
 
       <b-row class="px-5 py-3">
@@ -58,9 +58,8 @@ export default {
 
   data() {
     return {
-      offset: 0,
-      limit: 10,
-      playlistsPerPage: 10,
+      page: 0,
+      itemsPerPage: 28,
 
       playlists: [],
       selectedPlaylists: []
@@ -73,7 +72,22 @@ export default {
     }
   },
 
+  computed: {
+    shownPlaylists: function () {
+      if (this.playlists.items !== undefined) {
+        return this.playlists.items.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
+      }
+      return []
+    }
+  },
+
   methods: {
+    goToPage(newPage) {
+      if (newPage >= 0 && newPage * this.itemsPerPage < this.playlists.total) {
+        this.page = newPage
+      }
+    },
+
     openEditPlaylistModal() {
       if (!this.$store.getters.checkAuthorization) {
         this.createErrorDialog(401)
@@ -89,23 +103,14 @@ export default {
       }
     },
 
-    getPlaylists(offset, limit) {
+    getPlaylists() {
       if (!this.$store.getters.checkAuthorization) {
         this.createErrorDialog(401)
         return
       }
 
-      if (offset < 0) offset = 0
-      if (offset >= this.playlists.total) return
-      if (limit < 10) limit = 10
-
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists", {
-        withCredentials: true,
-        params: {offset: offset, limit: limit}
-      }).then(response => {
+      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists").then(response => {
         this.playlists = response.data
-        this.offset = offset
-        this.limit = limit
       }).catch(error => this.createErrorDialog(error.response.status))
     },
 
@@ -127,13 +132,14 @@ export default {
       }).then(() => {
         this.skipInvalidPlaylists(type).then(() => {
           if (!this.selectedPlaylists.length) return
-          const playlistsString = this.selectedPlaylists.map(playlist => {
-            if (type === 'Public/Private') return playlist.id + ':' + !playlist.public + ':' + playlist.collaborative
-            else if (type === 'Collaborative/Non-Collaborative') return playlist.id + ':' + playlist.public + ':' + !playlist.collaborative
-          }).join()
-          this.$axios.put("http://127.0.0.1:8000/spotifyapi/edit_playlists", null, {
-            withCredentials: true,
-            params: {playlistIds: playlistsString}
+          this.$axios.put("http://127.0.0.1:8000/spotifyapi/playlists", {
+            playlists: this.selectedPlaylists.map(playlist => {
+              return {
+                id: playlist.id,
+                public: type === 'Public/Private' ? !playlist.public : playlist.public,
+                collaborative: type === 'Collaborative/Non-Collaborative' ? !playlist.collaborative : playlist.collaborative
+              }
+            })
           }).then(() => {
             this.selectedPlaylists = []
             this.getPlaylists(this.offset, this.limit)
@@ -174,9 +180,8 @@ export default {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Unfollow', cancelTitle: 'Cancel'
       }).then(() => {
         const playlistsString = this.selectedPlaylists.map(playlist => playlist.id).join()
-        this.$axios.delete("http://127.0.0.1:8000/spotifyapi/unfollow_playlists", {
-          withCredentials: true,
-          params: {ids: playlistsString}
+        this.$axios.delete("http://127.0.0.1:8000/spotifyapi/playlists", {
+          params: {playlists: playlistsString}
         }).then(() => {
           this.selectedPlaylists = []
           this.getPlaylists(this.offset, this.limit)

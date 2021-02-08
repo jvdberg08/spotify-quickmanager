@@ -4,15 +4,15 @@
       <b-row class="text-center justify-content-center">
         <MenuButton container-size="col-6 col-lg-3"
                     button-text="Previous" button-size="lg"
-                    @clicked="getPlaylists(offset - playlistsPerPage, limit)"/>
+                    @clicked="goToPage(page - 1)"/>
 
         <MenuButton container-size="col-6 col-lg-3"
                     button-text="Next" button-size="lg"
-                    @clicked="getPlaylists(offset + playlistsPerPage, limit)"/>
+                    @clicked="goToPage(page + 1)"/>
       </b-row>
 
       <b-row class="px-5 mx-5 pt-3">
-        <b-col class="p-2" cols="12" v-for="playlist in playlists.items" :key="String(playlist.id)"
+        <b-col class="p-2" cols="12" v-for="playlist in shownPlaylists" :key="String(playlist.id)"
                @click="selectPlaylist(playlist.id)">
           <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist.id)"/>
         </b-col>
@@ -45,9 +45,8 @@ export default {
 
   data() {
     return {
-      offset: 0,
-      limit: 10,
-      playlistsPerPage: 10,
+      page: 0,
+      itemsPerPage: 5,
 
       playlists: [],
       selectedPlaylists: []
@@ -60,24 +59,30 @@ export default {
     }
   },
 
+  computed: {
+    shownPlaylists: function () {
+      if (this.playlists.items !== undefined) {
+        return this.playlists.items.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
+      }
+      return []
+    }
+  },
+
   methods: {
-    getPlaylists(offset, limit) {
+    goToPage(newPage) {
+      if (newPage >= 0 && newPage * this.itemsPerPage < this.playlists.total) {
+        this.page = newPage
+      }
+    },
+
+    getPlaylists() {
       if (!this.$store.getters.checkAuthorization) {
         this.createErrorDialog(401)
         return
       }
 
-      if (offset < 0) offset = 0
-      if (offset >= this.playlists.total) return
-      if (limit < 10) limit = 10
-
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists", {
-        withCredentials: true,
-        params: {offset: offset, limit: limit}
-      }).then(response => {
+      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists").then(response => {
         this.playlists = response.data
-        this.offset = offset
-        this.limit = limit
       }).catch(error => this.createErrorDialog(error.response.status))
     },
 

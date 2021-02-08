@@ -1,12 +1,231 @@
-import json
-from urllib import parse
-
 import requests
 from django.http import JsonResponse, HttpResponse
+from django.views import View
 
 from spotifyauth.views import is_authorized, refresh, check_session
 
 SPOTIFY_API_URL = 'https://api.spotify.com/v1'
+
+
+class LikedSongs(View):
+    """ View for interacting with the users Liked Songs (songs saved in their library)
+
+        GET:    Get all songs in the users Liked Songs collection.
+            returns:    Json Object { 'total': int, 'items': [Spotify SavedTrackObject] }
+
+        DELETE: Remove specified songs from the users Liked Songs collection.
+            query:      List of track ids separated by a comma ('id,id,id')
+    """
+
+    def get(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+
+        json_response = {'items': [], 'total': 50}
+        for i in range(0, json_response['total'] + 50, 50):
+            url = SPOTIFY_API_URL + '/me/tracks?limit=50&offset=' + str(i)
+            response = requests.get(url=url, headers=authorization)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+            json_response['total'] = response.json()['total']
+            json_response['items'] += response.json()['items']
+        return JsonResponse(data=json_response)
+
+    def delete(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+        track_ids = request.GET.get(key='tracks').split(',')
+
+        for i in range(0, len(track_ids), 50):
+            url = SPOTIFY_API_URL + '/me/tracks?ids=' + ','.join(track_ids[i:i + 50])
+            response = requests.delete(url=url, headers=authorization)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+        return HttpResponse(status=200)
+
+
+class Playlists(View):
+    """ View for interacting with multiple playlists at once
+
+        GET:    Get all playlists in the users library
+            returns:    Json Object { 'total': int, 'items': [Spotify SimplifiedPlaylistObject]
+
+        PUT:    Edit multiple playlists at once
+            body:       At least one of { 'name': string, 'public': bool, 'collaborative': bool, 'description': string }
+
+        DELETE: Delete multiple playlists at once
+            query:      List of playlist ids separated by a comma ('id,id,id')
+    """
+
+    def get(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+
+        json_response = {'items': [], 'total': 50}
+        for i in range(0, json_response['total'] + 50, 50):
+            url = SPOTIFY_API_URL + '/me/playlists?limit=50&offset=' + str(i)
+            response = requests.get(url=url, headers=authorization)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+            json_response['total'] = response.json()['total']
+            json_response['items'] += response.json()['items']
+        return JsonResponse(data=json_response)
+
+    def put(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        headers = make_auth(request)
+        headers['Content-Type'] = 'application/json'
+        playlists = request.PUT.get('playlists')
+
+        for playlist in playlists:
+            data = dict()
+            if playlist.get('name') is None and playlist.get('public') is None and \
+                    playlist.get('collaborative') is None and playlist.get('description', '') is '':
+                return HttpResponse(status=400)
+
+            if playlist.get('name') is not None:
+                data['name'] = playlist['name']
+            if playlist.get('public') is not None:
+                data['public'] = playlist['public']
+            if playlist.get('collaborative') is not None:
+                data['collaborative'] = playlist['collaborative']
+            if playlist.get('description', '') is not '':
+                data['description'] = playlist['description']
+            url = SPOTIFY_API_URL + '/playlists/' + playlist['id']
+            response = requests.put(url=url, json=data, headers=headers)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+        return HttpResponse(status=200)
+
+    def delete(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+        playlist_ids = request.GET.get(key='playlists').split(',')
+
+        for playlist_id in playlist_ids:
+            url = SPOTIFY_API_URL + '/playlists/' + playlist_id + '/followers'
+            response = requests.delete(url=url, headers=authorization)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+
+        return HttpResponse(status=200)
+
+
+class PlaylistsTracks(View):
+    """ View for interacting with all tracks from multiple playlists
+
+        POST:   Add a list of tracks to multiple playlists
+            query:  List of playlist ids separated by a comma ('id,id,id')
+            data:   List of track ids separated by a comma ('id,id,id')
+    """
+
+    def post(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+        playlist_ids = request.GET.get(key='playlists').split(',')
+        track_ids = request.POST.get('tracks').split(',')
+        track_ids = ['spotify:track:' + track_id for track_id in track_ids]
+
+        for playlist_id in playlist_ids:
+            for i in range(0, len(track_ids), 100):
+                url = SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?position=0&uris=' + ','.join(track_ids[i:i + 50])
+                response = requests.post(url=url, headers=authorization)
+                if response.status_code != 201:
+                    return HttpResponse(status=response.status_code)
+        return HttpResponse(status=201)
+
+
+class PlaylistTracks(View):
+    """ View for interacting with all tracks in a playlist
+
+        GET:    Get all tracks in a playlist
+            query:      The playlist id
+            returns:    Json Object { 'total': int, 'items': [Spotify SimplifiedTrackObject,SimplifiedEpisodeObject] }
+
+        PUT:    Reorder the tracks in a playlist
+            query:      The playlist id
+            body:       List of track ids separated by a comma (','),
+                        in the required order
+
+        DELETE: Delete specified tracks in a playlist
+            query:      The playlist id and a list of tracks separated by a comma (',')
+    """
+
+    def get(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+        playlist_id = request.GET.get(key='playlist')
+
+        json_response = {'items': [], 'total': 100}
+        for i in range(0, json_response['total'], 100):
+            url = SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?offset=' + str(i)
+            response = requests.get(url=url, headers=authorization)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+            json_response['total'] = response.json()['total']
+            json_response['items'] += response.json()['items']
+        return JsonResponse(data=json_response)
+
+    def put(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        authorization = make_auth(request)
+        playlist_id = request.GET.get('playlist')
+        track_ids = request.PUT.get('tracks').split(',')
+        track_ids = ['spotify:track:' + track_id for track_id in track_ids]
+
+        response = requests.put(url=SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?uris=', headers=authorization)
+        if response.status_code != 201:
+            return HttpResponse(status=response.status_code)
+
+        for i in range(0, len(track_ids), 100):
+            url = SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?uris=' + ','.join(track_ids[i:i + 100])
+            response = requests.post(url=url, headers=authorization)
+            if response.status_code != 201:
+                return HttpResponse(status=response.status_code)
+        return HttpResponse(status=201)
+
+    def delete(self, request):
+        auth_check = check_authorization(request)
+        if auth_check.status_code != 200:
+            return HttpResponse(status=auth_check.status_code)
+
+        headers = make_auth(request)
+        headers['Content-Type'] = 'application/json'
+        playlist_id = request.GET.get('playlist')
+        track_ids = request.GET.get('tracks').split(',')
+        track_ids = ['spotify:track:' + track_id for track_id in track_ids]
+
+        for i in range(0, len(track_ids), 100):
+            url = SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks'
+            data = {'tracks': [{'uri': track_id} for track_id in track_ids[i: i + 100]]}
+            response = requests.delete(url=url, json=data, headers=headers)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+        return HttpResponse(status=200)
 
 
 def check_authorization(request):
@@ -21,226 +240,3 @@ def check_authorization(request):
 
 def make_auth(request):
     return {'Authorization': 'Bearer ' + request.session.get('access_token', '')}
-
-
-def songs(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    limit = request.GET.get(key='limit', default='24')
-    offset = request.GET.get(key='offset', default='0')
-
-    response = requests.get(SPOTIFY_API_URL + '/me/tracks?limit=' + limit + '&offset=' + offset, headers=authorization)
-    if response.status_code == 200:
-        return JsonResponse(data=response.json())
-    else:
-        return HttpResponse(status=response.status_code)
-
-
-def delete_songs(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    song_ids = request.DELETE.get(key='ids')
-
-    response = requests.delete(SPOTIFY_API_URL + '/me/tracks?ids=' + song_ids, headers=authorization)
-    return HttpResponse(status=response.status_code)
-
-
-def playlists(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    limit = request.GET.get(key='limit', default='10')
-    offset = request.GET.get(key='offset', default='0')
-
-    response = requests.get(SPOTIFY_API_URL + '/me/playlists?limit=' + limit + '&offset=' + offset, headers=authorization)
-    if response.status_code == 200:
-        return JsonResponse(data=response.json())
-    else:
-        return HttpResponse(status=response.status_code)
-
-
-def unfollow_playlists(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    playlist_ids = request.DELETE.get(key='ids', default='')
-    playlist_ids = playlist_ids.split(',')
-
-    error_codes = []
-    for playlist_id in playlist_ids:
-        response = requests.delete(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/followers', headers=authorization)
-        if response.status_code != 200:
-            error_codes.append(response.status_code)
-
-    status = max(set(error_codes), key=error_codes.count) if error_codes else 200
-    return HttpResponse(status=status)
-
-
-def add_songs_to_playlists(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    song_ids = request.POST.get(key='songIds')
-    song_ids = ','.join('spotify:track:' + song_id for song_id in song_ids.split(','))
-    playlist_ids = request.POST.get(key='playlistIds')
-    playlist_ids = playlist_ids.split(',')
-
-    error_codes = []
-    for playlist_id in playlist_ids:
-        url = SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?position=0&uris=' + song_ids
-        response = requests.post(url=url, headers=authorization)
-        if response.status_code != 200:
-            error_codes.append(response.status_code)
-
-    status = max(set(error_codes), key=error_codes.count) if error_codes else 200
-    return HttpResponse(status=status)
-
-
-def edit_playlist(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    headers = make_auth(request)
-    headers['Content-Type'] = 'application/json'
-    playlist_id = request.PUT.get(key='playlistId')
-    name = request.PUT.get('name')
-    description = request.PUT.get('description')
-    public = request.PUT.get('public')
-    collaborative = request.PUT.get('collaborative')
-
-    if not name and not description and not public and not collaborative:
-        return HttpResponse(status=400)
-
-    data = dict()
-    if name:
-        data['name'] = name
-    if description:
-        data['description'] = description
-    if public:
-        data['public'] = public == 'true'
-    if collaborative:
-        data['collaborative'] = collaborative == 'true'
-
-    response = requests.put(url=SPOTIFY_API_URL + '/playlists/' + playlist_id, json=data, headers=headers)
-    return HttpResponse(status=response.status_code)
-
-
-def edit_playlists(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    headers = make_auth(request)
-    headers['Content-Type'] = 'application/json'
-    playlist_ids = request.PUT.get('playlistIds')
-    playlist_ids = playlist_ids.split(',')
-
-    for playlist_id in playlist_ids:
-        values = playlist_id.split(':')
-        playlist_id = values[0]
-        public = values[1] == 'true'
-        collaborative = values[2] == 'true'
-        response = requests.put(url=SPOTIFY_API_URL + '/playlists/' + playlist_id, json={'public': public, 'collaborative': collaborative},
-                                headers=headers)
-        if response.status_code != 200:
-            return HttpResponse(status=response.status_code)
-
-    return HttpResponse(status=200)
-
-
-def replace_playlist(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    playlist_id = request.PUT.get('playlistId')
-    song_ids = request.PUT.get('songIds')
-    song_ids = song_ids.split(',')
-
-    request_ids = []
-    for index, song_id in enumerate(song_ids):
-        print(request_ids)
-        if index > 0 and index % 100 == 0:
-            if index == 100:
-                response = requests.put(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?uris=' + ','.join(request_ids),
-                                        headers=authorization)
-            else:
-                response = requests.post(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?uris=' + ','.join(request_ids),
-                                         headers=authorization)
-
-            if response.status_code != 201:
-                return HttpResponse(status=response.status_code)
-            request_ids = []
-
-        request_ids.append('spotify:track:' + song_id)
-
-    if request_ids:
-        if len(song_ids) <= 100:
-            response = requests.put(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?uris=' + ','.join(request_ids),
-                                    headers=authorization)
-        else:
-            response = requests.post(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?uris='
-                                     + ','.join(request_ids), headers=authorization)
-        if response.status_code != 201:
-            return HttpResponse(status=response.status_code)
-
-    return HttpResponse(status=201)
-
-
-def playlist_songs(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    authorization = make_auth(request)
-    playlist_id = request.GET.get('playlistId')
-    json_response = {'items': []}
-
-    counter = 0
-    while True:
-        response = requests.get(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks?offset='
-                                + str(counter * 100), headers=authorization)
-        if response.status_code != 200:
-            return HttpResponse(status=response.status_code)
-        counter += 1
-        json_response['total'] = response.json()['total']
-        json_response['items'] += response.json()['items']
-
-        if counter * 100 > json_response['total']:
-            break
-
-    return JsonResponse(data=json_response)
-
-
-def remove_playlist_songs(request):
-    auth_check = check_authorization(request)
-    if auth_check.status_code != 200:
-        return HttpResponse(status=auth_check.status_code)
-
-    headers = make_auth(request)
-    headers['Content-Type'] = 'application/json'
-    playlist_id = request.DELETE.get('playlistId')
-    song_ids = request.DELETE.get('songIds')
-    song_ids = song_ids.split(',')
-
-    data = {'tracks': []}
-
-    for song_id in song_ids:
-        data['tracks'].append({'uri': 'spotify:track:' + song_id})
-
-    response = requests.delete(SPOTIFY_API_URL + '/playlists/' + playlist_id + '/tracks', json=data, headers=headers)
-    return HttpResponse(response.status_code)

@@ -4,7 +4,7 @@
 
     <b-row>
       <b-col cols="2" class="playlist-image-container">
-        <b-img :src="playlist.images[0].url"/>
+        <b-img v-if="playlist.images[0] !== undefined" :src="playlist.images[0].url"/>
       </b-col>
 
       <b-col cols="8" class="pl-4">
