@@ -39,13 +39,16 @@
                     button-text="Remove" button-size="lg"
                     button-variant="danger" v-on:clicked="removeSongs"/>
       </b-row>
-
-      <Draggable class="row px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center" v-model="songs.items">
-        <b-col cols="12" class="p-2" v-for="(song, index) in songs.items" :key="index"
-               @click="selectSong(song.track.id)">
-          <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)" :with-handle="true"/>
-        </b-col>
-      </Draggable>
+      <DataContainer :classes="'px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center'"
+                     :is-loading="isLoading"
+                     :min-height="30">
+        <Draggable v-model="songs.items">
+          <b-col cols="12" class="p-2" v-for="(song, index) in songs.items" :key="index"
+                 @click="selectSong(song.track.id)">
+            <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)" :with-handle="true"/>
+          </b-col>
+        </Draggable>
+      </DataContainer>
 
     </b-container>
   </b-modal>
@@ -58,12 +61,14 @@ import Song from "@/components/Song";
 import MenuButton from "@/components/MenuButton";
 
 import Draggable from 'vuedraggable'
+import DataContainer from "@/components/DataContainer";
 
 export default {
   name: "EditPlaylistModal",
   mixins: [util],
 
   components: {
+    DataContainer,
     Song,
     MenuButton,
     Draggable
@@ -77,6 +82,8 @@ export default {
 
   data() {
     return {
+      isLoading: false,
+
       songs: [],
       selectedSongs: [],
 
@@ -87,6 +94,19 @@ export default {
         collaborative: false
       }
     }
+  },
+
+  mounted() {
+    this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+      if (modalId === this.id) {
+        this.songs = []
+        this.getSongs()
+        this.name = this.playlist.name
+        this.description = this.playlist.description
+        this.checkboxes.isPublic = this.playlist.public
+        this.checkboxes.collaborative = this.playlist.collaborative
+      }
+    })
   },
 
   watch: {
@@ -105,19 +125,6 @@ export default {
     }
   },
 
-  mounted() {
-    this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
-      if (modalId === this.id) {
-        this.songs = []
-        this.getSongs()
-        this.name = this.playlist.name
-        this.description = this.playlist.description
-        this.checkboxes.isPublic = this.playlist.public
-        this.checkboxes.collaborative = this.playlist.collaborative
-      }
-    })
-  },
-
   methods: {
     getSongs() {
       if (!this.$store.getters.checkAuthorization) {
@@ -125,11 +132,16 @@ export default {
         return
       }
 
+      this.isLoading = true
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlist/tracks", {
         params: {playlist: this.playlist.id}
       }).then(response => {
         this.songs = response.data
-      }).catch(error => this.createErrorDialog(error.response.status))
+        this.isLoading = false
+      }).catch(error => {
+        this.createErrorDialog(error.response.status)
+        this.isLoading = false
+      })
     },
 
     selectSong(songId) {

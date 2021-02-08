@@ -23,12 +23,12 @@
                     v-on:clicked="goToPage(page + 1)"/>
       </b-row>
 
-      <b-row class="px-5 py-3">
+      <DataContainer :class="'px-5 py-3'" :is-loading="isLoading">
         <b-col class="p-2" cols="12" lg="4" xl="3" v-for="song in shownSongs" :key="String(song.track.id)"
                v-on:click="selectSong(song.track.id)">
           <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)"/>
         </b-col>
-      </b-row>
+      </DataContainer>
 
     </b-col>
   </b-row>
@@ -41,6 +41,7 @@ import Song from "@/components/Song";
 import MenuButton from "@/components/MenuButton";
 import MenuDropdownButton from "@/components/MenuDropdownButton";
 import SelectPlaylistModal from "@/views/SelectPlaylistModal";
+import DataContainer from "@/components/DataContainer";
 
 export default {
 
@@ -50,12 +51,15 @@ export default {
   components: {
     Song,
     MenuButton,
+    DataContainer,
     MenuDropdownButton,
     SelectPlaylistModal
   },
 
   data() {
     return {
+      isLoading: false,
+
       page: 0,
       itemsPerPage: 28,
 
@@ -115,9 +119,14 @@ export default {
         return
       }
 
+      this.isLoading = true
       this.$axios.get("http://127.0.0.1:8000/spotifyapi/liked_songs").then(response => {
         this.likedSongs = response.data
-      }).catch(error => this.createErrorDialog(error.response.status))
+        this.isLoading = false
+      }).catch(error => {
+        this.createErrorDialog(error.response.status)
+        this.isLoading = false
+      })
     },
 
     removeSongs(songIds) {
@@ -134,7 +143,7 @@ export default {
                 params: {tracks: songIds.join()}
               }).then(() => {
                     this.selectedSongs = []
-                    this.getSongs(this.offset, this.limit)
+                    this.getSongs()
                     this.$bvModal.msgBoxOk('Successfully removed songs from Liked Songs!', {
                       title: 'Success', okVariant: 'success'
                     })
