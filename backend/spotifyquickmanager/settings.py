@@ -14,11 +14,8 @@ CORS_ALLOWED_ORIGINS = [
 SESSION_COOKIE_AGE = 259200
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
     'spotifyauth',
@@ -26,15 +23,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'spotifyquickmanager.middleware.HttpPostTunnelingMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'spotifyquickmanager.middleware.SpotifyAuthorizationMiddleware',
+    'spotifyquickmanager.middleware.HttpPostTunnelingMiddleware',
 ]
 
 ROOT_URLCONF = 'spotifyquickmanager.urls'
