@@ -1,7 +1,8 @@
 # Spotify QuickManager
 I started this project to teach myself more about web development, about Django and Vue.js in particular.
 This is a tool that allows you to view all information about your Spotify library (such as Liked Songs, Playlists, 
-Artists, Albums). It's not very useful for anything, but it's mostly for my practice! :)
+Artists, Albums) and modify the data. You can for instance modify multiple songs and playlists at once, which you can't
+easily do in the Spotify client. Other than that it's not very useful for anything, but it's mostly for my practice! :)
 
 
 ## Installation
