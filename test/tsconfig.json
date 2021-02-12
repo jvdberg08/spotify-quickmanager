@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "./cypress/build",
+    "target": "es5",
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "types": [
+      "cypress"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}
