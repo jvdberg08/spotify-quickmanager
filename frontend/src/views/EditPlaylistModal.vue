@@ -23,32 +23,37 @@
             </b-form-group>
 
             <b-form-group>
-              <b-form-checkbox v-model="checkboxes.isPublic">Public</b-form-checkbox>
-              <b-form-checkbox v-model="checkboxes.collaborative">Collaborative</b-form-checkbox>
+              <b-form-checkbox id="playlist-checkbox-public" v-model="checkboxes.isPublic">
+                Public
+              </b-form-checkbox>
+              <b-form-checkbox id="playlist-checkbox-collaborative" v-model="checkboxes.collaborative">
+                Collaborative
+              </b-form-checkbox>
             </b-form-group>
           </b-form>
         </b-col>
       </b-row>
 
       <b-row class="text-center justify-content-center">
-        <MenuButton container-size="col-6 col-md-4 col-lg-3"
+        <MenuButton :id="'refresh-button'" container-size="col-6 col-md-4 col-lg-3"
                     button-text="Refresh" button-size="lg"
-                    button-variant="primary" v-on:clicked="getSongs"/>
+                    button-variant="primary" @clicked="getSongs"/>
 
-        <MenuButton container-size="col-6 col-md-4 col-lg-3"
+        <MenuButton :id="'remove-button'" container-size="col-6 col-md-4 col-lg-3"
                     button-text="Remove" button-size="lg"
-                    button-variant="danger" v-on:clicked="removeSongs"/>
+                    button-variant="danger" @clicked="removeSongs"/>
       </b-row>
-      <DataContainer :classes="'px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center'"
-                     :is-loading="isLoading"
-                     :min-height="30">
-        <Draggable v-model="songs.items">
+
+      <Draggable v-model="songs.items">
+        <DataContainer container-classes="px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center"
+                       :is-loading="isLoading"
+                       :min-height="30">
           <b-col cols="12" class="p-2" v-for="(song, index) in songs.items" :key="index"
                  @click="selectSong(song.track.id)">
             <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)" :with-handle="true"/>
           </b-col>
-        </Draggable>
-      </DataContainer>
+        </DataContainer>
+      </Draggable>
 
     </b-container>
   </b-modal>

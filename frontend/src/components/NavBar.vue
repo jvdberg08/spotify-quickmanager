@@ -3,21 +3,21 @@
     <b-col class="p-0 py-md-3" cols="12" md="8" offset-md="1" lg="6" offset-lg="3">
       <b-row class="items-container">
         <b-col cols="12" md="3">
-          <router-link class="item" to="/songs" replace>Songs</router-link>
+          <router-link id="navigation-songs" class="item" to="/songs" replace>Songs</router-link>
         </b-col>
         <b-col cols="12" md="3">
-          <router-link class="item" to="/playlists" replace>Playlists</router-link>
+          <router-link id="navigation-playlists" class="item" to="/playlists" replace>Playlists</router-link>
         </b-col>
         <b-col cols="12" md="3">
-          <router-link class="item" to="/albums" replace>Albums</router-link>
+          <router-link id="navigation-albums" class="item" to="/albums" replace>Albums</router-link>
         </b-col>
         <b-col cols="12" md="3">
-          <router-link class="item" to="/artists" replace>Artists</router-link>
+          <router-link id="navigation-artists" class="item" to="/artists" replace>Artists</router-link>
         </b-col>
       </b-row>
     </b-col>
     <b-col class="pt-3 p-md-0 mb-3 m-md-0" align-self="center" cols="12" md="2" xl="3">
-      <b-button v-if="this.$store.getters.checkAuthorization" @click="logout"
+      <b-button id="logout-button" v-if="this.$store.getters.checkAuthorization" @click="logout"
                 class="logout-button" size="lg" variant="danger">
         Log Out
         <img class="logout-icon ml-2 my-auto" src="../../public/log-out.png" alt="Log Out button"/>

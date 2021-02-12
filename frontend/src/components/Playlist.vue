@@ -1,5 +1,5 @@
 <template>
-  <b-col v-bind:class="{ 'playlist-container-is-selected': isSelected }"
+  <b-col :class="{ 'playlist-container-is-selected': isSelected }"
          class="playlist-container p-3">
 
     <b-row>

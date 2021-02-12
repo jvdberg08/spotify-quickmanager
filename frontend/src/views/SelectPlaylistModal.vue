@@ -2,16 +2,16 @@
   <b-modal :id="id" :title="title" size="xl" @ok="confirmSelection">
     <b-container fluid="">
       <b-row class="text-center justify-content-center">
-        <MenuButton container-size="col-6 col-lg-3"
+        <MenuButton :id="'previous-button'" container-size="col-6 col-lg-3"
                     button-text="Previous" button-size="lg"
                     @clicked="goToPage(page - 1)"/>
 
-        <MenuButton container-size="col-6 col-lg-3"
+        <MenuButton :id="'previous-button'" container-size="col-6 col-lg-3"
                     button-text="Next" button-size="lg"
                     @clicked="goToPage(page + 1)"/>
       </b-row>
 
-      <DataContainer :class="'px-5 mx-5 pt-3'" :is-loading="isLoading">
+      <DataContainer container-classes="px-5 mx-5 pt-3" :is-loading="isLoading">
         <b-col class="p-2" cols="12" v-for="playlist in shownPlaylists" :key="String(playlist.id)"
                @click="selectPlaylist(playlist.id)">
           <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist.id)"/>

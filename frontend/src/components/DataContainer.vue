@@ -1,7 +1,7 @@
 <template>
-  <b-row :class="classes" :style="{minHeight: getMinHeight + 'vh'}">
+  <b-row :class="containerClasses" :style="{minHeight: getMinHeight + 'vh'}">
     <b-col v-if="isLoading" class="text-center m-auto">
-      <b-spinner class="spinner" type="grow" variant="primary"/>
+      <b-spinner id="loading-spinner" class="spinner" type="grow" variant="primary"/>
     </b-col>
     <slot v-else/>
   </b-row>
@@ -12,7 +12,7 @@ export default {
   name: "DataContainer",
 
   props: {
-    classes: String,
+    containerClasses: String,
     minHeight: {default: 70, type: Number},
     isLoading: {required: true, type: Boolean}
   },

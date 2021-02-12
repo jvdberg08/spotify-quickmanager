@@ -1,16 +1,15 @@
 <template>
   <TabBase require-authorization>
-    <SelectPlaylistModal :id="'add-songs-to-playlist-modal'" :title="'Add Selected Songs to Playlist'"
+    <SelectPlaylistModal id="add-songs-to-playlist-modal" title="Add Selected Songs to Playlist"
                          @ok="addSongsToPlaylist"/>
 
     <b-col class="py-3 px-0 px-sm-5">
 
       <b-row class="text-center" align-h="center">
-        <MenuButton container-size="col-4 col-sm-3 col-md-2"
-                    button-text="Previous" button-size="lg"
-                    v-on:clicked="goToPage(page - 1)"/>
+        <MenuButton :id="'previous-button'" container-size="col-4 col-sm-3 col-md-2"
+                    button-text="Previous" button-size="lg" @click="goToPage(page - 1)"/>
 
-        <MenuDropdownButton container-size="col-4 col-sm-3 col-md-2"
+        <MenuDropdownButton :id="'actions-dropdown-button'" container-size="col-4 col-sm-3 col-md-2"
                             button-text="Actions" button-size="lg" button-variant="primary">
           <b-dropdown-item @click="getSongs">Refresh</b-dropdown-item>
           <b-dropdown-item @click="openSelectPlaylistsModal">Add Selected To Playlist
@@ -18,12 +17,12 @@
           <b-dropdown-item @click="removeSongs(selectedSongs)">Remove Selected from Liked Songs</b-dropdown-item>
         </MenuDropdownButton>
 
-        <MenuButton container-size="col-4 col-sm-3 col-md-2"
+        <MenuButton :id="'next-button'" container-size="col-4 col-sm-3 col-md-2"
                     button-text="Next" button-size="lg"
-                    v-on:clicked="goToPage(page + 1)"/>
+                    @click="goToPage(page + 1)"/>
       </b-row>
 
-      <DataContainer :class="'px-5 py-3'" :is-loading="isLoading">
+      <DataContainer container-classes="px-5 py-3" :is-loading="isLoading">
         <b-col class="p-2" cols="12" lg="4" xl="3" v-for="song in shownSongs" :key="String(song.track.id)"
                v-on:click="selectSong(song.track.id)">
           <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)"/>

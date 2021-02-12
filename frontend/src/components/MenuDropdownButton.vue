@@ -1,6 +1,6 @@
 <template>
   <b-col :class="containerSize">
-    <b-dropdown class="menu-button" :text="buttonText" :size="buttonSize" :variant="buttonVariant">
+    <b-dropdown :id="id" class="menu-button" :text="buttonText" :size="buttonSize" :variant="buttonVariant">
       <slot/>
     </b-dropdown>
   </b-col>
@@ -11,7 +11,10 @@ import MenuButton from "@/components/MenuButton";
 
 export default {
   name: "MenuDropdownButton",
-  mixins: [MenuButton]
+  mixins: [MenuButton],
+  props: {
+    id: String
+  }
 }
 </script>
 
