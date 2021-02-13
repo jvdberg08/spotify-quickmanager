@@ -11,5 +11,7 @@ declare namespace Cypress {
         createPlaylists(fixturePath: string, accessToken: string, callback: (playlists: Array<string>) => any): void
 
         unfollowPlaylists(playlists: Array<string>, accessToken: string): void
+
+        checkPlaylistsHaveTracks(playlists: Array<string>, tracks: Array<string>, accessToken: string): void
     }
 }
