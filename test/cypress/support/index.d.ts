@@ -13,5 +13,7 @@ declare namespace Cypress {
         unfollowPlaylists(playlists: Array<string>, accessToken: string): void
 
         checkPlaylistsHaveTracks(playlists: Array<string>, tracks: Array<string>, accessToken: string): void
+
+        checkLikedTracks(tracks: Array<string>, include: boolean, accessToken: string): void
     }
 }
