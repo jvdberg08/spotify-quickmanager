@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "runner": "cypress open",
+    "tests": "cypress run"
+  },
+  "devDependencies": {
+    "axios": "^0.21.1",
+    "cypress": "^6.4.0",
+    "typescript": "^4.1.5",
+    "webpack": "^5.21.2"
+  },
+  "dependencies": {
+    "@cypress/webpack-preprocessor": "^5.5.0"
+  }
+}
