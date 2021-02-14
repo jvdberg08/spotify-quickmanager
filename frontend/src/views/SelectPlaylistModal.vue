@@ -2,11 +2,15 @@
   <b-modal :id="id" :title="title" size="xl" @ok="confirmSelection">
     <b-container fluid="">
       <b-row class="text-center justify-content-center">
-        <MenuButton :id="'previous-button'" container-size="col-6 col-lg-3"
+        <MenuButton :id="'previous-button'" container-size="col-4 col-lg-3"
                     button-text="Previous" button-size="lg"
                     @clicked="goToPage(page - 1)"/>
 
-        <MenuButton :id="'previous-button'" container-size="col-6 col-lg-3"
+        <MenuButton :id="'refresh-button'" container-size="col-4 col-lg-3"
+                    button-text="Refresh" button-size="lg"
+                    button-variant="primary" @clicked="getPlaylists"/>
+
+        <MenuButton :id="'previous-button'" container-size="col-4 col-lg-3"
                     button-text="Next" button-size="lg"
                     @clicked="goToPage(page + 1)"/>
       </b-row>
@@ -57,10 +61,13 @@ export default {
     }
   },
 
-  beforeMount() {
-    if (this.$store.getters.checkAuthorization) {
-      this.getPlaylists(this.offset, this.limit)
-    }
+  mounted() {
+    this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+      if (modalId === this.id) {
+        this.playlists = []
+        this.getPlaylists()
+      }
+    })
   },
 
   computed: {
