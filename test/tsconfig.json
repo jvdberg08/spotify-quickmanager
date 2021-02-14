@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./cypress",
     "outDir": "./cypress/build",
     "target": "es5",
     "lib": [

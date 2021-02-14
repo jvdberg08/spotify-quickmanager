@@ -4,7 +4,7 @@ import requests
 from time import time
 from urllib import parse
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.conf import settings
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -36,6 +36,7 @@ def authorize(request):
 
 def authorized(request):
     code = request.GET.get(key='code')
+    print(code)
     payload = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -58,6 +59,14 @@ def authorized(request):
 def un_authorize(request):
     request.session.flush()
     return HttpResponse(status=200)
+
+
+def get_authorization(request):
+    client_secret = request.GET.get(key='client_secret')
+    if base64.b64encode(CLIENT_SECRET.encode('ascii')).decode('ascii') == client_secret:
+        return JsonResponse(data={'access_token': request.session.get('access_token', 'none')})
+    else:
+        return HttpResponse(status=401)
 
 
 def get_auth_headers():
