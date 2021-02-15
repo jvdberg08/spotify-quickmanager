@@ -4,7 +4,8 @@ import requests
 from time import time
 from urllib import parse
 
-from django.http import HttpResponse
+from django.contrib.sessions.models import Session
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.conf import settings
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -36,6 +37,7 @@ def authorize(request):
 
 def authorized(request):
     code = request.GET.get(key='code')
+    print(code)
     payload = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -58,6 +60,36 @@ def authorized(request):
 def un_authorize(request):
     request.session.flush()
     return HttpResponse(status=200)
+
+
+# Used in testing to get access token to make spotify api requests to setup and clean data
+@ensure_csrf_cookie
+def get_authorization(request):
+    client_secret = request.GET.get(key='client_secret')
+    if base64.b64encode(CLIENT_SECRET.encode('ascii')).decode('ascii') == client_secret:
+        refresh_token = Session.objects.first().get_decoded().get('refresh_token')
+        payload = {
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token
+        }
+        headers = get_auth_headers()
+        response = requests.post(url=OAUTH_TOKEN_URL, data=payload, headers=headers)
+
+        if response.status_code != 200:
+            print(response.status_code)
+            return HttpResponse(status=response.status_code)
+
+        json_response = response.json()
+        access_token = json_response['access_token']
+        expires_on = json_response['expires_in'] * 1000 + int(time() * 1000)
+
+        request.session['access_token'] = access_token
+        request.session['refresh_token'] = refresh_token
+        request.session['expires_on'] = expires_on
+
+        return JsonResponse(data={'access_token': request.session.get('access_token', 'none')})
+    else:
+        return HttpResponse(status=401)
 
 
 def get_auth_headers():

@@ -1,8 +1,6 @@
 declare namespace Cypress {
     interface Chainable {
-        login(): void
-
-        getSpotifyAuthorization(callback: Function): void
+        getAccessToken(visit: boolean): Chainable
 
         saveTracks(fixturePath: string, accessToken: string): void
 
