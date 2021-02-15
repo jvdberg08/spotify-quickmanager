@@ -1,12 +1,15 @@
 context('Check Remove Liked Songs Functionality', () => {
 
     before(() => {
-        cy.login()
-        cy.saveTracks('tracks1.json', Cypress.env('accessToken'))
+        cy.getAccessToken(true).then(accessToken => {
+            cy.saveTracks('tracks1.json', accessToken)
+        })
     })
 
     after(() => {
-        cy.removeTracks('tracks1.json', Cypress.env('accessToken'))
+        cy.getAccessToken(false).then(accessToken => {
+            cy.removeTracks('tracks1.json', accessToken)
+        })
     })
 
     it('Check Remove Liked Songs Functionality', () => {
@@ -35,7 +38,9 @@ context('Check Remove Liked Songs Functionality', () => {
         cy.get('.modal-footer').contains('button', 'Cancel').should('be.visible').click()
         cy.get('.modal-dialog').should('not.exist')
         cy.fixture('tracks1.json').then(fixture => {
-            cy.checkLikedTracks(fixture.tracks.map(track => track.id), true, Cypress.env('accessToken'))
+            cy.getAccessToken(false).then(accessToken => {
+                cy.checkLikedTracks(fixture.tracks.map(track => track.id), true, accessToken)
+            })
         })
 
         // Step 5
@@ -63,7 +68,9 @@ context('Check Remove Liked Songs Functionality', () => {
 
         // Step 9
         cy.fixture('tracks1.json').then(fixture => {
-            cy.checkLikedTracks(fixture.tracks.map(track => track.id), false, Cypress.env('accessToken'))
+            cy.getAccessToken(false).then(accessToken => {
+                cy.checkLikedTracks(fixture.tracks.map(track => track.id), false, accessToken)
+            })
         })
 
     })

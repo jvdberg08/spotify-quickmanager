@@ -1,6 +1,6 @@
 declare namespace Cypress {
     interface Chainable {
-        login(): void
+        getAccessToken(visit: boolean): Chainable
 
         saveTracks(fixturePath: string, accessToken: string): void
 

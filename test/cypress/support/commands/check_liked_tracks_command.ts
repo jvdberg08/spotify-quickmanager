@@ -9,7 +9,6 @@ export default function checkLikedTracks(tracks: Array<string>, include: boolean
         method: 'GET',
         headers: headers
     }).then(response => {
-        console.log(response)
         expect(response.body).to.not.include(!include)
     })
 }

@@ -1,16 +1,19 @@
 context('Check Add Songs To Playlists Functionality', () => {
 
     before(() => {
-        cy.login()
-        cy.saveTracks('tracks1.json', Cypress.env('accessToken'))
-        cy.createPlaylists('playlists1.json', Cypress.env('accessToken'), (playlists) => {
-            this.playlists = playlists
+        cy.getAccessToken(true).then(accessToken => {
+            cy.saveTracks('tracks1.json', accessToken)
+            cy.createPlaylists('playlists1.json', accessToken, (playlists) => {
+                this.playlists = playlists
+            })
         })
     })
 
     after(() => {
-        cy.removeTracks('tracks1.json', Cypress.env('accessToken'))
-        cy.unfollowPlaylists(this.playlists, Cypress.env('accessToken'))
+        cy.getAccessToken(false).then(accessToken => {
+            cy.removeTracks('tracks1.json', accessToken)
+            cy.unfollowPlaylists(this.playlists, accessToken)
+        })
     })
 
     it('Check Add Songs To Playlists Functionality', () => {
@@ -53,7 +56,9 @@ context('Check Add Songs To Playlists Functionality', () => {
 
         // Step 7
         cy.fixture('tracks1.json').then(fixture => {
-            cy.checkPlaylistsHaveTracks(this.playlists, fixture.tracks.map(track => track.id), Cypress.env('accessToken'))
+            cy.getAccessToken(false).then(accessToken => {
+                cy.checkPlaylistsHaveTracks(this.playlists, fixture.tracks.map(track => track.id), accessToken)
+            })
         })
     })
 })
