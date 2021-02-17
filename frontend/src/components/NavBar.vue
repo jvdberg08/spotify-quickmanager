@@ -35,7 +35,7 @@ export default {
 
   methods: {
     logout() {
-      this.$axios.get('http://127.0.0.1:8000/spotifyauth/un_authorize', {
+      this.$axios.get(process.env.VUE_APP_BACKEND_AUTH + "/un_authorize", {
         withCredentials: true
       }).then(() => this.$store.commit('clearAuthorization'))
           .catch(error => this.createErrorDialog(error.response.status))

@@ -121,7 +121,7 @@ export default {
       }
 
       this.isLoading = true
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/liked_songs").then(response => {
+      this.$axios.get(process.env.VUE_APP_BACKEND_API + "/liked_songs").then(response => {
         this.likedSongs = response.data
         this.isLoading = false
       }).catch(error => {
@@ -140,7 +140,7 @@ export default {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Delete', cancelTitle: 'Cancel'
       }).then(value => {
             if (value) {
-              this.$axios.delete('http://127.0.0.1:8000/spotifyapi/liked_songs', {
+              this.$axios.delete(process.env.VUE_APP_BACKEND_API + "/liked_songs", {
                 params: {tracks: songIds.join()}
               }).then(() => {
                     this.selectedSongs = []
@@ -163,7 +163,7 @@ export default {
 
       const playlistString = playlistIds.join()
       const songsString = this.selectedSongs.join()
-      this.$axios.post('http://127.0.0.1:8000/spotifyapi/playlists/tracks',
+      this.$axios.post(process.env.VUE_APP_BACKEND_API + "/playlists/tracks",
           {tracks: songsString},
           {params: {playlists: playlistString}}).then(() => {
         this.selectedSongs = []

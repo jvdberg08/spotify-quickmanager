@@ -1,4 +1,6 @@
 import base64
+import os
+
 import requests
 
 from time import time
@@ -9,17 +11,18 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.conf import settings
 from django.views.decorators.csrf import ensure_csrf_cookie
+from dotenv import load_dotenv
 
-CLIENT_ID = 'client_id_here'
-CLIENT_SECRET = 'client_secret_here'
+load_dotenv()
 
-SCOPE = 'user-library-read user-library-modify user-follow-read user-follow-modify ' \
-        'playlist-read-collaborative playlist-modify-public playlist-read-private playlist-modify-private ' \
-        'user-read-email user-read-private'
-REDIRECT_URI = 'http://127.0.0.1:8000/spotifyauth/authorized'
+CLIENT_ID = os.environ['SPOTIFY_CLIENT_ID']
+CLIENT_SECRET = os.environ['SPOTIFY_CLIENT_SECRET']
 
-OAUTH_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
-OAUTH_TOKEN_URL = 'https://accounts.spotify.com/api/token'
+SCOPE = os.environ['SPOTIFY_SCOPE']
+REDIRECT_URI = os.environ['SPOTIFY_REDIRECT_URI']
+
+OAUTH_AUTHORIZE_URL = os.environ['SPOTIFY_AUTHORIZE_URL']
+OAUTH_TOKEN_URL = os.environ['SPOTIFY_TOKEN_URL']
 
 
 @ensure_csrf_cookie

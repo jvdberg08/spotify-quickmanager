@@ -1,4 +1,5 @@
 build
-cypress.env.json
 videos
+node_modules
+cypress.env.json
 screenshots

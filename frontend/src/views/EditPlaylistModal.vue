@@ -138,7 +138,7 @@ export default {
       }
 
       this.isLoading = true
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlist/tracks", {
+      this.$axios.get(process.env.VUE_APP_BACKEND_API + "/playlist/tracks", {
         params: {playlist: this.playlist.id}
       }).then(response => {
         this.songs = response.data
@@ -163,7 +163,7 @@ export default {
         return
       }
 
-      this.$axios.delete("http://127.0.0.1:8000/spotifyapi/playlist/tracks", {
+      this.$axios.delete(process.env.VUE_APP_BACKEND_API + "/playlist/tracks", {
         params: {
           playlist: this.playlist.id,
           tracks: this.selectedSongs.join()
@@ -182,7 +182,7 @@ export default {
         return
       }
 
-      this.$axios.put("http://127.0.0.1:8000/spotifyapi/playlists", {
+      this.$axios.put(process.env.VUE_APP_BACKEND_API + "/playlists", {
         playlists: [{
           id: this.playlist.id,
           name: this.name,
@@ -191,7 +191,7 @@ export default {
           collaborative: this.checkboxes.collaborative
         }]
       }).then(() => {
-        this.$axios.put("http://127.0.0.1:8000/spotifyapi/playlist/tracks",
+        this.$axios.put(process.env.VUE_APP_BACKEND_API + "/playlist/tracks",
             {tracks: this.songs.items.map(song => song.track.id).join()},
             {params: {playlist: this.playlist.id}}).then(() => {
           this.$bvModal.msgBoxOk('Successfully edited playlist!', {

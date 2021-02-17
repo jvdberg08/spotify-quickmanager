@@ -119,7 +119,7 @@ export default {
       }
 
       this.isLoading = true
-      this.$axios.get("http://127.0.0.1:8000/spotifyapi/playlists").then(response => {
+      this.$axios.get(process.env.VUE_APP_BACKEND_API + "/playlists").then(response => {
         this.playlists = response.data
         this.isLoading = false
       }).catch(error => {
@@ -146,7 +146,7 @@ export default {
       }).then(() => {
         this.skipInvalidPlaylists(type).then(() => {
           if (!this.selectedPlaylists.length) return
-          this.$axios.put("http://127.0.0.1:8000/spotifyapi/playlists", {
+          this.$axios.put(process.env.VUE_APP_BACKEND_API + "/playlists", {
             playlists: this.selectedPlaylists.map(playlist => {
               return {
                 id: playlist.id,
@@ -194,7 +194,7 @@ export default {
         title: 'Please Confirm', okVariant: 'danger', okTitle: 'Unfollow', cancelTitle: 'Cancel'
       }).then(() => {
         const playlistsString = this.selectedPlaylists.map(playlist => playlist.id).join()
-        this.$axios.delete("http://127.0.0.1:8000/spotifyapi/playlists", {
+        this.$axios.delete(process.env.VUE_APP_BACKEND_API + "/playlists", {
           params: {playlists: playlistsString}
         }).then(() => {
           this.selectedPlaylists = []
