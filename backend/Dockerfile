@@ -1,8 +1,11 @@
-FROM python:3-alpine
-ENV PYTHONUNBUFFERED=1
+FROM python:3.6
+ENV PYTHONUNBUFFERED 1
 
-COPY ./requirements.txt ./django/
+WORKDIR /django
 
-WORKDIR ./django
-
+COPY requirements.txt .
 RUN pip install -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
