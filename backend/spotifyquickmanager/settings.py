@@ -13,8 +13,11 @@ DEBUG = bool(os.environ.get('DJANGO_DEBUG', False))
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8080",
     "http://127.0.0.1"
+]
+
+ALLOWED_HOSTS = [
+    "127.0.0.1"
 ]
 
 SESSION_COOKIE_AGE = int(os.environ.get('DJANGO_SESSION_COOKIE_AGE', 259200))
