@@ -69,10 +69,9 @@ def un_authorize(request):
 def get_authorization(request):
     client_secret = request.GET.get(key='client_secret')
     if base64.b64encode(SPOTIFY_CLIENT_SECRET.encode('ascii')).decode('ascii') == client_secret:
-        refresh_token = Session.objects.first().get_decoded().get('refresh_token')
         payload = {
             'grant_type': 'refresh_token',
-            'refresh_token': refresh_token
+            'refresh_token': os.environ.get('CYPRESS_SPOTIFY_REFRESH_TOKEN', 'Refresh Token Not Set In /backend/.env')
         }
         headers = get_auth_headers()
         response = requests.post(url=SPOTIFY_TOKEN_URL, data=payload, headers=headers)
@@ -85,7 +84,7 @@ def get_authorization(request):
         expires_on = json_response['expires_in'] * 1000 + int(time() * 1000)
 
         request.session['access_token'] = access_token
-        request.session['refresh_token'] = refresh_token
+        request.session['refresh_token'] = os.environ.get('CYPRESS_SPOTIFY_REFRESH_TOKEN', 'Refresh Token Not Set In /backend/.env')
         request.session['expires_on'] = expires_on
 
         return JsonResponse(data={'access_token': request.session.get('access_token', 'none')})
