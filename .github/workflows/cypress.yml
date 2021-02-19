@@ -1,0 +1,21 @@
+name: Automatic Testing
+on: [push]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Testing
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: .
+          start: docker-compose -f docker-compose.prod.yml up
+          project: ./test
+          record: true
+          wait-on: 'http://127.0.0.1'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
