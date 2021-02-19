@@ -23,7 +23,8 @@ jobs:
           sed -i "s/client_secret/$SPOTIFY_CLIENT_SECRET/g" ./backend/.env
           sed -i "s/spotify_refresh_token/$SPOTIFY_REFRESH_TOKEN/g" ./backend/.env
           sed -i "s/django_secret/$DJANGO_SECRET_KEY/g" ./backend/.env
-          cat ./backend/.env
+          cp ./test/cypress.env.example.json ./test/cypress.env.json
+          sed -i "s/\"client_secret\"/\"$SPOTIFY_CLIENT_SECRET\"/g" ./test/cypress.env.json
 
       - name: Run Application
         run: docker-compose -f docker-compose.prod.yml up -d
