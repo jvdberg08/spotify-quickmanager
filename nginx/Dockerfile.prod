@@ -3,11 +3,11 @@ FROM node:14-alpine as vuejs-build
 WORKDIR /vuejs
 
 COPY ./frontend/package*.json ./
-RUN npm install
+RUN npm install --silent
 
 COPY ./frontend .
 
-RUN npm run build
+RUN npm run build --silent
 
 
 FROM nginx:alpine
