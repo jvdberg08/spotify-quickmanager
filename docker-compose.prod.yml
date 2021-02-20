@@ -1,36 +1,36 @@
 version: "3"
 
 services:
-  vuejs:
-    container_name: spqm_dev_vuejs
-    build: ./frontend
-    command: npm run serve -- --port 80
+  nginx:
+    container_name: spqm_nginx
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile.prod
     ports:
       - 80:80
-    volumes:
-      - ./frontend:/vuejs
+    restart: always
     depends_on:
       - django
 
   django:
-    container_name: spqm_dev_django
-    build: ./backend
-    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 1; done; python manage.py runserver 0.0.0.0:8000'
+    container_name: spqm_django
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    command: sh -c 'python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 spotifyquickmanager.wsgi'
     ports:
       - 8000:8000
-    volumes:
-      - ./backend:/django
     depends_on:
       postgres:
         condition: service_healthy
 
   postgres:
-    container_name: spqm_dev_postgres
+    container_name: spqm_postgres
     image: postgres:latest
     env_file:
       - ./backend/.env
     ports:
-      - 5432:5432
+      - 5432:5432 
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -38,4 +38,3 @@ services:
       interval: 2s
       timeout: 5s
       retries: 15
-

@@ -3,7 +3,7 @@ import requests
 from time import time
 from django.http import HttpResponse
 
-from spotifyauth.views import get_auth_headers, OAUTH_TOKEN_URL
+from spotifyauth.views import get_auth_headers, SPOTIFY_TOKEN_URL
 
 
 class HttpPostTunnelingMiddleware(object):
@@ -43,7 +43,7 @@ class SpotifyAuthorizationMiddleware(object):
             'refresh_token': refresh_token
         }
         headers = get_auth_headers()
-        response = requests.post(url=OAUTH_TOKEN_URL, data=payload, headers=headers)
+        response = requests.post(url=SPOTIFY_TOKEN_URL, data=payload, headers=headers)
 
         if response.status_code != 200:
             return HttpResponse(status=response.status_code)

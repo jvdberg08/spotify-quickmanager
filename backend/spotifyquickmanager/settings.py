@@ -7,14 +7,17 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-print(os.environ)
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 DEBUG = bool(os.environ.get('DJANGO_DEBUG', False))
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8080"
+    "http://127.0.0.1"
+]
+
+ALLOWED_HOSTS = [
+    "127.0.0.1"
 ]
 
 SESSION_COOKIE_AGE = int(os.environ.get('DJANGO_SESSION_COOKIE_AGE', 259200))
@@ -61,8 +64,12 @@ WSGI_APPLICATION = 'spotifyquickmanager.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ['POSTGRES_DB'],
+        'USER': os.environ['POSTGRES_USER'],
+        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+        'HOST': os.environ['POSTGRES_HOST'],
+        'PORT': int(os.environ.get('POSTGRES_PORT', 5432)),
     }
 }
 

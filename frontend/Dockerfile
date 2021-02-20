@@ -1,7 +1,7 @@
 FROM node:14-alpine
 
-COPY ./package.json ./vuejs/
+WORKDIR /vuejs
 
-WORKDIR ./vuejs
+COPY ./package*.json ./
 
 RUN npm install

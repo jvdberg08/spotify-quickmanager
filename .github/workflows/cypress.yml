@@ -1,0 +1,40 @@
+name: Automatic Testing
+on: [push]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Setup Environment Variables
+        shell: bash
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REFRESH_TOKEN: ${{ secrets.CYPRESS_SPOTIFY_REFRESH_TOKEN }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+        run: |
+          cp ./backend/.env.example ./backend/.env
+          sed -i "s/client_id/$SPOTIFY_CLIENT_ID/g" ./backend/.env
+          sed -i "s/client_secret/$SPOTIFY_CLIENT_SECRET/g" ./backend/.env
+          sed -i "s/spotify_refresh_token/$SPOTIFY_REFRESH_TOKEN/g" ./backend/.env
+          sed -i "s/django_secret/$DJANGO_SECRET_KEY/g" ./backend/.env
+          cp ./test/cypress.env.example.json ./test/cypress.env.json
+          sed -i "s/\"client_secret\"/\"$SPOTIFY_CLIENT_SECRET\"/g" ./test/cypress.env.json
+
+      - name: Run Application
+        run: docker-compose -f docker-compose.prod.yml up -d
+
+      - name: Run Testing
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: test
+          record: true
+          wait-on: 'http://127.0.0.1'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
