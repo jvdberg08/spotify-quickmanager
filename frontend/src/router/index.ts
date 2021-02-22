@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import SongsTab from "@/views/SongsTab";
-import PlaylistsTab from "@/views/PlaylistsTab";
-import AlbumsTab from "@/views/AlbumsTab";
-import ArtistsTab from "@/views/ArtistsTab";
+import SongsTab from "@/views/SongsTab.vue";
+import PlaylistsTab from "@/views/PlaylistsTab.vue";
+import AlbumsTab from "@/views/AlbumsTab.vue";
+import ArtistsTab from "@/views/ArtistsTab.vue";
 
 import store from "@/store";
 

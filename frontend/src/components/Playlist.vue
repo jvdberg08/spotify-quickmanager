@@ -26,14 +26,14 @@
   </b-col>
 </template>
 
-<script>
-export default {
-  name: "Song",
+<script lang="ts">
+import {Prop, Component, Vue} from "vue-property-decorator";
+import {Playlist as IPlaylist} from "@/mixins/interfaces";
 
-  props: {
-    playlist: Object,
-    isSelected: Boolean
-  }
+@Component
+export default class Playlist extends Vue {
+  @Prop({required: true}) playlist!: IPlaylist
+  @Prop({required: true}) isSelected!: boolean
 }
 </script>
 

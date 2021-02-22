@@ -1,6 +1,6 @@
 <template>
-  <b-modal scrollable :id="id" :playlist="playlist" :title="title" size="xl"
-           @ok="submitEdits">
+  <b-modal scrollable :id="id" :playlist="playlist" title="Edit Playlist" size="xl"
+           @ok="editPlaylist">
     <b-container fluid="">
 
       <b-row>
@@ -23,7 +23,7 @@
             </b-form-group>
 
             <b-form-group>
-              <b-form-checkbox id="playlist-checkbox-public" v-model="checkboxes.isPublic">
+              <b-form-checkbox id="playlist-checkbox-public" v-model="checkboxes.public">
                 Public
               </b-form-checkbox>
               <b-form-checkbox id="playlist-checkbox-collaborative" v-model="checkboxes.collaborative">
@@ -37,20 +37,18 @@
       <b-row class="text-center justify-content-center">
         <MenuButton :id="'refresh-button'" container-size="col-6 col-md-4 col-lg-3"
                     button-text="Refresh" button-size="lg"
-                    button-variant="primary" @clicked="getSongs"/>
+                    button-variant="primary" @click="getSongs"/>
 
         <MenuButton :id="'remove-button'" container-size="col-6 col-md-4 col-lg-3"
                     button-text="Remove" button-size="lg"
-                    button-variant="danger" @clicked="removeSongs"/>
+                    button-variant="danger" @click="removeSongs"/>
       </b-row>
 
-      <Draggable v-model="songs.items">
-        <DataContainer container-classes="px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center"
-                       :is-loading="isLoading"
-                       :min-height="30">
-          <b-col cols="12" class="p-2" v-for="(song, index) in songs.items" :key="index"
-                 @click="selectSong(song.track.id)">
-            <Song :song="song" :is-selected="selectedSongs.includes(song.track.id)" :with-handle="true"/>
+      <Draggable v-model="tracks">
+        <DataContainer container-classes="px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center" :min-height="30">
+          <b-col cols="12" class="p-2" v-for="track in tracks" :key="track.id"
+                 @click="selectSong(track)">
+            <Song :track="track" :is-selected="selectedTracks.includes(track)" :with-handle="true"/>
           </b-col>
         </DataContainer>
       </Draggable>
@@ -59,146 +57,101 @@
   </b-modal>
 </template>
 
-<script>
-import util from "@/mixins/util"
-
-import Song from "@/components/Song";
-import MenuButton from "@/components/MenuButton";
-
+<script lang="ts">
+import Track from "@/components/Track.vue";
+import MenuButton from "@/components/MenuButton.vue";
+import DataContainer from "@/components/DataContainer.vue";
 import Draggable from 'vuedraggable'
-import DataContainer from "@/components/DataContainer";
 
-export default {
-  name: "EditPlaylistModal",
-  mixins: [util],
+import {Component, Mixins, Prop, Watch} from "vue-property-decorator";
+import {Playlist as IPlaylist, Track as ITrack} from "@/mixins/interfaces"
+import TrackAPI from "../mixins/track_api";
+import PlaylistAPI from "@/mixins/playlist_api";
+import {BvEvent, BvModalEvent} from "bootstrap-vue";
 
+@Component({
   components: {
-    DataContainer,
-    Song,
+    Song: Track,
     MenuButton,
+    DataContainer,
     Draggable
-  },
+  }
+})
+export default class EditPlaylistModal extends Mixins(TrackAPI, PlaylistAPI) {
 
-  props: {
-    id: String,
-    playlist: Object,
-    title: String
-  },
+  @Prop({required: true}) id!: string
+  @Prop({required: true}) playlist!: IPlaylist
 
-  data() {
-    return {
-      isLoading: false,
+  name = ''
+  description = ''
+  checkboxes = {
+    public: false,
+    collaborative: false
+  }
 
-      songs: [],
-      selectedSongs: [],
-
-      name: '',
-      description: '',
-      checkboxes: {
-        isPublic: false,
-        collaborative: false
-      }
-    }
-  },
+  tracks: ITrack[] = []
+  selectedTrackIds: string[] = []
 
   mounted() {
-    this.$root.$on('bv::modal::show', (bvEvent, modalId) => {
+    this.$root.$on('bv::modal::show', (bvEvent: BvEvent, modalId: string) => {
       if (modalId === this.id) {
-        this.songs = []
         this.getSongs()
         this.name = this.playlist.name
         this.description = this.playlist.description
-        this.checkboxes.isPublic = this.playlist.public
+        this.checkboxes.public = this.playlist.public
         this.checkboxes.collaborative = this.playlist.collaborative
       }
     })
-  },
+  }
 
-  watch: {
-    checkboxes: {
-      handler() {
-        if (this.checkboxes.isPublic && this.checkboxes.collaborative) {
-          this.$bvModal.msgBoxOk('A playlist can\'t be public and collaborative!', {
-            title: 'Error', okVariant: 'danger'
-          }).then(() => {
-            this.checkboxes.isPublic = this.playlist.public
-            this.checkboxes.collaborative = this.playlist.collaborative
-          })
-        }
-      },
-      deep: true
+  @Watch('playlist', {deep: true})
+  onInputChange(val: IPlaylist, oldVal: IPlaylist) {
+    if (val.public && val.collaborative) {
+      this.$bvModal.msgBoxOk('A playlist can\'t be public and collaborative!',
+          {title: 'Error', okVariant: 'danger'}).then(() => val = oldVal)
     }
-  },
+  }
 
-  methods: {
-    getSongs() {
-      if (!this.$store.getters.checkAuthorization) {
-        this.createErrorDialog(401)
-        return
-      }
+  get selectedTracks(): ITrack[] {
+    return this.tracks.filter(track => this.selectedTrackIds.includes(track.id))
+  }
 
-      this.isLoading = true
-      this.$axios.get(process.env.VUE_APP_BACKEND_API + "/playlist/tracks", {
-        params: {playlist: this.playlist.id}
-      }).then(response => {
-        this.songs = response.data
-        this.isLoading = false
-      }).catch(error => {
-        this.createErrorDialog(error.response.status)
-        this.isLoading = false
-      })
-    },
+  getSongs() {
+    this.getPlaylistTracksData(this.playlist).then(tracks => this.tracks = tracks)
+  }
 
-    selectSong(songId) {
-      if (this.selectedSongs.includes(songId)) {
-        this.selectedSongs.splice(this.selectedSongs.indexOf(songId), 1)
-      } else {
-        this.selectedSongs.push(songId)
-      }
-    },
-
-    removeSongs() {
-      if (!this.$store.getters.checkAuthorization) {
-        this.createErrorDialog(401)
-        return
-      }
-
-      this.$axios.delete(process.env.VUE_APP_BACKEND_API + "/playlist/tracks", {
-        params: {
-          playlist: this.playlist.id,
-          tracks: this.selectedSongs.join()
-        }
-      }).then(() => {
+  removeSongs() {
+    this.removePlaylistTracksData(this.playlist, this.selectedTracks).then(value => {
+      if (value) {
+        this.selectedTrackIds = []
         this.getSongs()
-        this.$bvModal.msgBoxOk('Successfully removed songs from playlist!', {
-          title: 'Success', okVariant: 'success'
-        })
-      }).catch(error => this.createErrorDialog(error.response.status))
-    },
-
-    submitEdits() {
-      if (!this.$store.getters.checkAuthorization) {
-        this.createErrorDialog(401)
-        return
       }
+    })
+  }
 
-      this.$axios.put(process.env.VUE_APP_BACKEND_API + "/playlists", {
-        playlists: [{
-          id: this.playlist.id,
-          name: this.name,
-          description: this.description,
-          public: this.checkboxes.isPublic,
-          collaborative: this.checkboxes.collaborative
-        }]
-      }).then(() => {
-        this.$axios.put(process.env.VUE_APP_BACKEND_API + "/playlist/tracks",
-            {tracks: this.songs.items.map(song => song.track.id).join()},
-            {params: {playlist: this.playlist.id}}).then(() => {
-          this.$bvModal.msgBoxOk('Successfully edited playlist!', {
-            title: 'Success', okVariant: 'success'
-          })
-        }).catch(error => this.createErrorDialog(error.response.status))
-      }).catch(error => this.createErrorDialog(error.response.status))
+  editPlaylist(bvModalEvent: BvModalEvent) {
+    bvModalEvent.preventDefault()
+    this.editPlaylistData({
+      id: this.playlist.id,
+      images: this.playlist.images,
+      name: this.name,
+      description: this.description,
+      public: this.checkboxes.public,
+      collaborative: this.checkboxes.collaborative
+    }).then(value => {
+      if (value) {
+        this.$nextTick(() => {
+          this.$bvModal.hide(this.id)
+        })
+      }
+    })
+  }
+
+  selectSong(track: ITrack) {
+    if (this.selectedTrackIds.includes(track.id)) {
+      this.selectedTrackIds.splice(this.selectedTrackIds.indexOf(track.id), 1)
+    } else {
+      this.selectedTrackIds.push(track.id)
     }
   }
 }

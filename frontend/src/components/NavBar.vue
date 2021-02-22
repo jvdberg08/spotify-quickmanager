@@ -26,20 +26,18 @@
   </b-row>
 </template>
 
-<script>
-import util from "@/mixins/util";
+<script lang="ts">
+import {Component, Vue} from "vue-property-decorator";
 
-export default {
-  name: "NavBar",
-  mixins: [util],
+@Component
+export default class NavBar extends Vue {
 
-  methods: {
-    logout() {
-      this.$axios.get(process.env.VUE_APP_BACKEND_AUTH + "/un_authorize", {
-        withCredentials: true
-      }).then(() => this.$store.commit('clearAuthorization'))
-          .catch(error => this.createErrorDialog(error.response.status))
-    }
+  logout() {
+    this.$axios.get(process.env.VUE_APP_BACKEND_AUTH + "/un_authorize", {
+      withCredentials: true
+    }).then(() => {
+      this.$store.commit('clearAuthorization')
+    }).catch(error => console.log(error))
   }
 }
 </script>

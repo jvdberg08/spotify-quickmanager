@@ -15,7 +15,7 @@ context('Check Refresh Functionality', () => {
 
         // Step 1
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
-            cy.contains('.song-container', track.name)
+            cy.contains('.track-container', track.name)
                 .should('not.exist')
         }))
         cy.getAccessToken(false).then(accessToken => {
@@ -29,9 +29,9 @@ context('Check Refresh Functionality', () => {
         // Step 3
         cy.contains('a', 'Refresh').click()
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
-            cy.contains('.song-container', track.name)
+            cy.contains('.track-container', track.name)
                 .should('be.visible')
-                .and('not.have.class', 'song-container-is-selected')
+                .and('not.have.class', 'track-container-is-selected')
         }))
 
         // Step 4
