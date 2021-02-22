@@ -1,10 +1,14 @@
 <template>
-<div></div>
+  <div></div>
 </template>
 
-<script>
-export default {
-  name: "AlbumsTab"
+<script lang="ts">
+
+import {Component, Vue} from "vue-property-decorator";
+
+@Component
+export default class AlbumsTab extends Vue {
+  name = "AlbumsTab"
 }
 </script>
 

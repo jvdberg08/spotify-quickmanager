@@ -1,10 +1,13 @@
 <template>
-<div></div>
+  <div></div>
 </template>
 
-<script>
-export default {
-  name: "ArtistsTab"
+<script lang="ts">
+import {Component, Vue} from "vue-property-decorator";
+
+@Component
+export default class ArtistsTab extends Vue {
+  name = "ArtistsTab"
 }
 </script>
 
