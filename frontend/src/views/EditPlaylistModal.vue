@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import Song from "@/components/Song.vue";
+import Track from "@/components/Track.vue";
 import MenuButton from "@/components/MenuButton.vue";
 import DataContainer from "@/components/DataContainer.vue";
 import Draggable from 'vuedraggable'
@@ -71,7 +71,7 @@ import {BvEvent, BvModalEvent} from "bootstrap-vue";
 
 @Component({
   components: {
-    Song,
+    Song: Track,
     MenuButton,
     DataContainer,
     Draggable

@@ -25,7 +25,7 @@ import {Prop, Component, Vue} from 'vue-property-decorator'
 import {Track as ITrack} from "@/mixins/interfaces";
 
 @Component
-export default class Song extends Vue {
+export default class Track extends Vue {
   @Prop({required: true}) track!: ITrack
   @Prop({required: true}) isSelected!: boolean
   @Prop({default: false}) withHandle!: boolean

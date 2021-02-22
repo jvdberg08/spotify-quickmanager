@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import Song from "@/components/Song.vue"
+import Track from "@/components/Track.vue"
 import TabBase from "@/views/TabBase.vue";
 import DataContainer from "@/components/DataContainer.vue";
 import MenuButton from "@/components/MenuButton.vue";
@@ -44,7 +44,7 @@ import {Track as ITrack} from "@/mixins/interfaces";
 
 @Component({
   components: {
-    Song,
+    Song: Track,
     TabBase,
     DataContainer,
     MenuButton,

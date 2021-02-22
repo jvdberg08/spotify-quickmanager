@@ -20,11 +20,11 @@ context('Check Add Songs To Playlists Functionality', () => {
 
         // Step 1
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
-            cy.contains('.song-container', track.name)
+            cy.contains('.track-container', track.name)
                 .should('be.visible')
-                .and('not.have.class', 'song-container-is-selected')
+                .and('not.have.class', 'track-container-is-selected')
                 .click()
-                .should('have.class', 'song-container-is-selected')
+                .should('have.class', 'track-container-is-selected')
         }))
 
         // Step 2 - 3

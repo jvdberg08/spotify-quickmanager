@@ -50,7 +50,7 @@ export default class PlaylistAPI extends Vue {
 
     async unfollowPlaylistsData(playlists: IPlaylist[], confirm = true, notification = true): Promise<boolean> {
         if (confirm) {
-            const isConfirmed = this.$bvModal.msgBoxConfirm('Are you sure you want to unfollow all selected playlists?',
+            const isConfirmed = await this.$bvModal.msgBoxConfirm('Are you sure you want to unfollow all selected playlists?',
                 {title: 'Please Confirm', okVariant: 'danger', okTitle: 'Unfollow', cancelTitle: 'Cancel'})
             if (!isConfirmed) return false
         }
