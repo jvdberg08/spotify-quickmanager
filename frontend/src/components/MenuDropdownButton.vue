@@ -6,15 +6,13 @@
   </b-col>
 </template>
 
-<script>
-import MenuButton from "@/components/MenuButton";
+<script lang="ts">
 
-export default {
-  name: "MenuDropdownButton",
-  mixins: [MenuButton],
-  props: {
-    id: String
-  }
+import {Component} from "vue-property-decorator";
+import MenuButton from "@/components/MenuButton.vue";
+
+@Component
+export default class MenuDropdownButton extends MenuButton {
 }
 </script>
 

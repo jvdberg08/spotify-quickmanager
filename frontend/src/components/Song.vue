@@ -1,16 +1,16 @@
 <template>
-  <b-col :class="{ 'song-container-is-selected': isSelected }"
-         class="song-container p-3">
+  <b-col :class="{ 'track-container-is-selected': isSelected }"
+         class="track-container p-3">
 
-    <div class="float-left song-image-container">
-      <b-img :src="song.track.album.images[2].url"/>
+    <div class="float-left track-image-container">
+      <b-img :src="track.album.images[2].url"/>
     </div>
 
     <b-row>
       <b-col cols="11">
         <b-row>
-          <b-col cols="12" class="song-name"><strong>{{ song.track.name }}</strong></b-col>
-          <b-col cols="12" class="song-artists">{{ song.track.artists.map(artist => artist.name).join(', ') }}</b-col>
+          <b-col cols="12" class="track-name"><strong>{{ track.name }}</strong></b-col>
+          <b-col cols="12" class="track-artists">{{ track.artists.map(artist => artist.name).join(', ') }}</b-col>
         </b-row>
       </b-col>
       <b-col v-if="withHandle" class="p-0 pr-3" cols="1">
@@ -20,20 +20,20 @@
   </b-col>
 </template>
 
-<script>
-export default {
-  name: "Song",
+<script lang="ts">
+import {Prop, Component, Vue} from 'vue-property-decorator'
+import {Track as ITrack} from "@/mixins/interfaces";
 
-  props: {
-    song: Object,
-    isSelected: Boolean,
-    withHandle: Boolean
-  }
+@Component
+export default class Song extends Vue {
+  @Prop({required: true}) track!: ITrack
+  @Prop({required: true}) isSelected!: boolean
+  @Prop({default: false}) withHandle!: boolean
 }
 </script>
 
 <style scoped>
-.song-container {
+.track-container {
   cursor: pointer;
   text-align: center;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -42,11 +42,11 @@ export default {
   border-radius: 30px;
 }
 
-.song-container-is-selected {
+.track-container-is-selected {
   background-color: #3471eb80;
 }
 
-.song-name {
+.track-name {
   text-align: left;
   font-size: 22px;
   white-space: nowrap;
@@ -54,7 +54,7 @@ export default {
   text-overflow: ellipsis;
 }
 
-.song-artists {
+.track-artists {
   text-align: left;
   font-size: 18px;
   white-space: nowrap;
@@ -62,13 +62,12 @@ export default {
   text-overflow: ellipsis;
 }
 
-.song-image-container {
+.track-image-container {
   max-width: 64px;
   max-height: 64px;
-  /*float: left;*/
 }
 
-.song-image-container img {
+.track-image-container img {
   border-radius: 15px;
 }
 </style>

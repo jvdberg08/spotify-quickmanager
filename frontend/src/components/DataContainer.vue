@@ -1,35 +1,28 @@
 <template>
   <b-row :class="containerClasses" :style="{minHeight: getMinHeight + 'vh'}">
-    <b-col v-if="isLoading" class="text-center m-auto">
+    <b-col v-if="$store.getters.isLoading" class="text-center m-auto">
       <b-spinner id="loading-spinner" class="spinner" type="grow" variant="primary"/>
     </b-col>
     <slot v-else/>
   </b-row>
 </template>
 
-<script>
-export default {
-  name: "DataContainer",
+<script lang="ts">
+import {Component, Prop, Vue} from "vue-property-decorator";
 
-  props: {
-    containerClasses: String,
-    minHeight: {default: 70, type: Number},
-    isLoading: {required: true, type: Boolean}
-  },
+@Component
+export default class DataContainer extends Vue {
 
-  computed: {
-    getMinHeight() {
-      return this.isLoading ? this.minHeight : 0
-    }
+  @Prop({default: 'px-5 py-3'}) containerClasses!: string
+  @Prop({default: 70}) minHeight!: number
+
+  get getMinHeight() {
+    return this.$store.getters.isLoading ? this.minHeight : 0
   }
 }
 </script>
 
 <style scoped>
-.data-container {
-  min-height: 70vh;
-}
-
 .spinner {
   height: 5vh;
   width: 5vh;

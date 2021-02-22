@@ -9,15 +9,17 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 
-import NavBar from "@/components/NavBar";
+import NavBar from "@/components/NavBar.vue";
+import {Component, Vue} from "vue-property-decorator";
 
-export default {
-  name: "App",
+@Component({
   components: {
     NavBar
   }
+})
+export default class App extends Vue {
 }
 </script>
 

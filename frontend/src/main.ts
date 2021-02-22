@@ -2,7 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 
 import {BootstrapVue, BootstrapVueIcons} from 'bootstrap-vue';
-import axios from 'axios'
+import axios, {AxiosStatic} from 'axios'
+
+import 'vue-class-component/hooks'
 
 import router from './router'
 import store from './store'
@@ -17,7 +19,11 @@ Vue.prototype.$axios = axios
 axios.defaults.withCredentials = true
 axios.defaults.xsrfHeaderName = 'X-CSRFToken'
 axios.defaults.xsrfCookieName = 'csrftoken'
-Vue.config.productionTip = false
+declare module 'vue/types/vue' {
+  interface Vue {
+    $axios: AxiosStatic;
+  }
+}
 
 new Vue({
     router,
