@@ -23,6 +23,7 @@
 
 <script lang="ts">
 import {Component, Prop, VModel, Vue, Watch} from "vue-property-decorator";
+import {Playlist as IPlaylist, Track as ITrack} from "@/mixins/interfaces";
 
 export enum FilterType {
   Name, Description, Artist, Album, Owner
@@ -31,8 +32,8 @@ export enum FilterType {
 @Component
 export default class SearchContainer extends Vue {
 
-  @VModel({type: Array}) filteredItems!: any[]
-  @Prop({required: true}) items!: any[]
+  @VModel({type: Array}) filteredItems!: Array<IPlaylist | ITrack>
+  @Prop({required: true}) items!: Array<IPlaylist | ITrack>
   @Prop({required: true}) types!: FilterType[]
 
   filterOption: FilterType = FilterType.Name
@@ -65,13 +66,13 @@ export default class SearchContainer extends Vue {
     } else if (this.filterOption === FilterType.Name) {
       this.filteredItems = this.items.filter(item => item.name.toLowerCase().includes(val))
     } else if (this.filterOption === FilterType.Artist) {
-      this.filteredItems = this.items.filter(item => item.artists.map((artist: any) => artist.name).join().toLowerCase().includes(val))
+      this.filteredItems = (this.items as ITrack[]).filter(item => item.artists.map(artist => artist.name).join().toLowerCase().includes(val))
     } else if (this.filterOption === FilterType.Album) {
-      this.filteredItems = this.items.filter(item => item.album.map((album: any) => album.name).join().toLowerCase().includes(val))
+      this.filteredItems = (this.items as ITrack[]).filter(item => item.album.name.toLowerCase().includes(val))
     } else if (this.filterOption === FilterType.Description) {
-      this.filteredItems = this.items.filter(item => item.description.toLowerCase().includes(val))
+      this.filteredItems = (this.items as IPlaylist[]).filter(item => item.description.toLowerCase().includes(val))
     } else if (this.filterOption === FilterType.Owner) {
-      this.filteredItems = this.items.filter(item => item.owner.display_name.toLowerCase().includes(val))
+      this.filteredItems = (this.items as IPlaylist[]).filter(item => item.owner.display_name.toLowerCase().includes(val))
     }
   }
 }

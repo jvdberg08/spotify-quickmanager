@@ -5,7 +5,7 @@ export interface Playlist {
     public: boolean;
     collaborative: boolean;
     images: Array<{ url: string }>;
-    owner: { displayName: string, id: string }
+    owner: { display_name: string, id: string }
 }
 
 export interface Track {
