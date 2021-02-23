@@ -30,10 +30,12 @@
       </b-row>
 
       <DataContainer container-classes="px-5 py-3" :is-loading="isLoading">
-        <b-col class="p-2" cols="12" lg="4" xl="3" v-for="playlist in shownPlaylists" :key="String(playlist.id)"
-               @click="selectPlaylist(playlist)">
-          <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
-        </b-col>
+        <SearchContainer :items="playlists" :types="filterOptions" v-model="filteredPlaylists">
+          <b-col class="p-2" cols="12" lg="4" xl="3" v-for="playlist in shownPlaylists" :key="String(playlist.id)"
+                 @click="selectPlaylist(playlist)">
+            <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
+          </b-col>
+        </SearchContainer>
       </DataContainer>
 
     </b-col>
@@ -45,6 +47,7 @@ import Playlist from "@/components/Playlist.vue";
 import MenuButton from "@/components/MenuButton.vue";
 import MenuDropdownButton from "@/components/MenuDropdownButton.vue";
 import DataContainer from "@/components/DataContainer.vue";
+import SearchContainer, {FilterType} from "@/components/SearchContainer.vue";
 import TabBase from "@/views/TabBase.vue";
 import EditPlaylistModal from "@/views/EditPlaylistModal.vue";
 
@@ -59,16 +62,19 @@ import {Playlist as IPlaylist} from "@/mixins/interfaces"
     MenuDropdownButton,
     EditPlaylistModal,
     DataContainer,
+    SearchContainer,
     TabBase
   }
 })
 export default class PlaylistsTab extends PlaylistAPI {
   EditPlaylistType = EditPlaylistType
+  filterOptions = [FilterType.Name, FilterType.Description, FilterType.Owner]
 
   isLoading = false
   page = 0
   itemsPerPage = 28
   playlists: IPlaylist[] = []
+  filteredPlaylists: IPlaylist[] = []
   selectedPlaylistIds: string[] = []
 
   async beforeMount() {
@@ -79,7 +85,7 @@ export default class PlaylistsTab extends PlaylistAPI {
 
 
   get shownPlaylists(): IPlaylist[] {
-    return this.playlists.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
+    return this.filteredPlaylists.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
   }
 
   get selectedPlaylists(): IPlaylist[] {
