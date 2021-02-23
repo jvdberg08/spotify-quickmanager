@@ -26,7 +26,7 @@ class SpotifyAuthorizationMiddleware(object):
         access_token = request.session.get(key='access_token')
         refresh_token = request.session.get(key='refresh_token')
         expires_on = request.session.get(key='expires_on', default=0)
-        is_authorized = access_token is not None and refresh_token is not None and expires_on > time() * 100
+        is_authorized = access_token is not None and refresh_token is not None and expires_on > time() * 1000
 
         if not is_authorized and refresh_token is not None:
             is_authorized = self.refresh(request)
@@ -54,3 +54,5 @@ class SpotifyAuthorizationMiddleware(object):
 
         request.session['access_token'] = access_token
         request.session['expires_on'] = expires_on
+
+        return HttpResponse(status=200)
