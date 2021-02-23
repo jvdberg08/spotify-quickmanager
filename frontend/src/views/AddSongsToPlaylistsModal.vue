@@ -16,10 +16,12 @@
       </b-row>
 
       <DataContainer container-classes="px-5 mx-5 pt-3" :min-height="40">
-        <b-col class="p-2" cols="12" v-for="playlist in shownPlaylists" :key="playlist.id"
-               @click="selectPlaylist(playlist)">
-          <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
-        </b-col>
+        <SearchContainer :items="playlists" :types="filterOptions" v-model="filteredPlaylists">
+          <b-col class="p-2" cols="12" v-for="playlist in shownPlaylists" :key="playlist.id"
+                 @click="selectPlaylist(playlist)">
+            <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
+          </b-col>
+        </SearchContainer>
       </DataContainer>
 
     </b-container>
@@ -35,15 +37,18 @@ import {Component, Prop} from "vue-property-decorator";
 import {Playlist as IPlaylist, Track as ITrack} from "@/mixins/interfaces"
 import PlaylistAPI from "@/mixins/playlist_api";
 import {BvEvent, BvModalEvent} from "bootstrap-vue";
+import SearchContainer, {FilterType} from "@/components/SearchContainer.vue";
 
 @Component({
   components: {
     Playlist,
     MenuButton,
-    DataContainer
+    DataContainer,
+    SearchContainer
   }
 })
 export default class SelectPlaylistModal extends PlaylistAPI {
+  filterOptions = [FilterType.Name, FilterType.Description, FilterType.Owner]
 
   @Prop({required: true}) id!: string
   @Prop({required: true}) tracks!: ITrack[]
@@ -52,6 +57,7 @@ export default class SelectPlaylistModal extends PlaylistAPI {
   itemsPerPage = 5
 
   playlists: IPlaylist[] = []
+  filteredPlaylists: IPlaylist[] = []
   selectedPlaylistIds: string[] = []
 
   mounted() {
@@ -63,7 +69,7 @@ export default class SelectPlaylistModal extends PlaylistAPI {
   }
 
   get shownPlaylists(): IPlaylist[] {
-    return this.playlists.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
+    return this.filteredPlaylists.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
   }
 
   get selectedPlaylists(): IPlaylist[] {

@@ -137,7 +137,8 @@ export default class EditPlaylistModal extends Mixins(TrackAPI, PlaylistAPI) {
       name: this.name,
       description: this.description,
       public: this.checkboxes.public,
-      collaborative: this.checkboxes.collaborative
+      collaborative: this.checkboxes.collaborative,
+      owner: this.playlist.owner
     }).then(value => {
       if (value) {
         this.$nextTick(() => {
