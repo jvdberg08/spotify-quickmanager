@@ -57,7 +57,7 @@ context('Check Add Songs To Playlists Functionality', () => {
         // Step 7
         cy.fixture('tracks1.json').then(fixture => {
             cy.getAccessToken(false).then(accessToken => {
-                cy.checkPlaylistsHaveTracks(this.playlists, fixture.tracks.map(track => track.id), accessToken)
+                cy.checkPlaylistsHaveTracks(this.playlists, 'tracks1.json', accessToken)
             })
         })
     })
