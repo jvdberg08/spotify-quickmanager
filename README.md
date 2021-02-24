@@ -7,22 +7,19 @@ easily do in the Spotify client. Other than that it's not very useful for anythi
 
 ## Installation
 
-First you will need to create your own Spotify API application on
-https://developer.spotify.com/dashboard/applications and put the `CLIENT ID` and `CLIENT Secret` in
-`backend/spotifyauth/views.py`.
+1. Run `git clone https://github.com/jvdberg08/spotify-quickmanager.git && cp ./spotify-quickmanager/backend/.env.example ./spotify-quickmanager/backend/.env && cd ./spotify-quickmanager`
+2. You will need to create your own Spotify API application on https://developer.spotify.com/dashboard/applications. Take the `CLIENT_ID` and `CLIENT_SECRET` and put them in `./backend/.env`
+3. Next, you need to generate a random django `SECRET_KEY` and put it in `./backend/.env`
+4. Create a virtual environment and install dependencies (ex. `virtualenv ./backend/venv`, automatically installs packages from `./backend/requirements.txt`)
+5a. Run `docker-compose up` for a dev environment or `docker-compose -f docker-compose.prod.yml up` for a production environment
+5b. If you don't have Docker, you can create a postgres database yourself and run `python ./backend/manage.py runserver` and `cd ./frontend/ && npm run serve -- --port 80`
 
-Next, you need to generate a random django `SECRET_KEY` with the method
-`django.core.management.utils.get_random_secret_key()` and put it in `backend/spotifyquickmanager/settings.py`.
+## Running tests
 
-### Docker
-
-`git clone https://github.com/jvdberg08/spotify-quickmanager.git
-&& cd spotify-quickmanager && docker-compose up`
-
-
-### Manual
-
-`git clone https://github.com/jvdberg08/spotify-quickmanager.git && cd spotify-quickmanager/backend
-&& source ../venv/bin/activate && pip install -r requirements.txt && python manage.py runserver`
-
-And in another terminal: `cd spotify-quickmanager/frontend && npm install && npm run serve`
+1. Run steps above
+2. Run `cp ./test/cypress.env.example.json ./test/cypress.env.json`
+3. Put Spotify `CLIENT_ID` in `./test/cypress.env.json`
+4. Get a Spotify refresh token for your account: [Spotify API Reference](https://developer.spotify.com/documentation/general/guides/authorization-guide/#authorization-code-flow)
+5. Put this refresh token in `./backend/.env`
+6. Run `cd ./test/ && npm run runner`
+7. Run the tests you want with the Cypress Test Suite
