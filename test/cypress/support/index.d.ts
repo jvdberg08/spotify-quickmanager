@@ -2,16 +2,20 @@ declare namespace Cypress {
     interface Chainable {
         getAccessToken(visit: boolean): Chainable
 
-        saveTracks(fixturePath: string, accessToken: string): void
+        saveTracks(tracksFixture: string, accessToken: string): void
 
-        removeTracks(fixturePath: string, accessToken: string): void
+        removeTracks(tracksFixture: string, accessToken: string): void
 
-        createPlaylists(fixturePath: string, accessToken: string, callback: (playlists: Array<string>) => any): void
+        createPlaylists(playlistsFixture: string, accessToken: string, callback: (playlists: string[]) => any): void
 
-        unfollowPlaylists(playlists: Array<string>, accessToken: string): void
+        unfollowPlaylists(playlists: string[], accessToken: string): void
 
-        checkPlaylistsHaveTracks(playlists: Array<string>, tracks: Array<string>, accessToken: string): void
+        checkPlaylistsHaveTracks(playlists: string[], tracksFixture: string, accessToken: string): void
 
-        checkLikedTracks(tracks: Array<string>, include: boolean, accessToken: string): void
+        checkLikedTracks(tracksFixture: string, include: boolean, accessToken: string): void
+
+        addTracksToPlaylists(tracksFixture: string, playlists: string[], accessToken: string): void
+
+        removeTracksFromPlaylists(tracksFixture: string, playlists: string[], accessToken: string): void
     }
 }

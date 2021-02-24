@@ -1,5 +1,5 @@
-export default function saveTracks(fixturePath: string, accessToken: string) {
-    cy.fixture(fixturePath).then(fixture => {
+export default function saveTracks(tracksFixture: string, accessToken: string) {
+    cy.fixture(tracksFixture).then(fixture => {
         const data = {
             'ids': fixture.tracks.map(track => track.id)
         }

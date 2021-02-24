@@ -1,4 +1,4 @@
-export default function checkLikedTracks(tracks: Array<string>, include: boolean, accessToken: string
+export default function checkLikedTracks(tracks: string[], include: boolean, accessToken: string
 ) {
     const headers = {
         'Authorization': 'Bearer ' + accessToken,
