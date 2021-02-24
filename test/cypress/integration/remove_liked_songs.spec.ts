@@ -37,10 +37,8 @@ context('Check Remove Liked Songs Functionality', () => {
         cy.get('.modal-footer').contains('button', 'Delete').should('be.visible')
         cy.get('.modal-footer').contains('button', 'Cancel').should('be.visible').click()
         cy.get('.modal-dialog').should('not.exist')
-        cy.fixture('tracks1.json').then(fixture => {
-            cy.getAccessToken(false).then(accessToken => {
-                cy.checkLikedTracks(fixture.tracks.map(track => track.id), true, accessToken)
-            })
+        cy.getAccessToken(false).then(accessToken => {
+            cy.checkLikedTracks('tracks1.json', true, accessToken)
         })
 
         // Step 5
@@ -67,11 +65,8 @@ context('Check Remove Liked Songs Functionality', () => {
         cy.get('.modal-dialog').should('not.exist')
 
         // Step 9
-        cy.fixture('tracks1.json').then(fixture => {
-            cy.getAccessToken(false).then(accessToken => {
-                cy.checkLikedTracks(fixture.tracks.map(track => track.id), false, accessToken)
-            })
+        cy.getAccessToken(false).then(accessToken => {
+            cy.checkLikedTracks('tracks1.json', false, accessToken)
         })
-
     })
 })
