@@ -1,4 +1,4 @@
-export default function createPlaylists(fixturePath: string, accessToken: string, callback?: (playlists: string[]) => any) {
+export default function createPlaylists(fixturePath: string, accessToken: string, callback: (playlists: string[]) => any) {
     cy.fixture(fixturePath).then(fixture => {
         const headers = {
             'Authorization': 'Bearer ' + accessToken,

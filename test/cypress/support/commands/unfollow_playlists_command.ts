@@ -1,4 +1,4 @@
-export default function unfollowPlaylists(playlists: Array<string>, accessToken: string) {
+export default function unfollowPlaylists(playlists: string[], accessToken: string) {
     const headers = {
         'Authorization': 'Bearer ' + accessToken,
         'Content-Type': 'application/json'
