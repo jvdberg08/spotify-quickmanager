@@ -21,6 +21,28 @@ export enum EditPlaylistType {
 @Component
 export default class PlaylistAPI extends Vue {
 
+    createPlaylistData(name: string, description: string, isPublic: boolean, isCollaborative: boolean, notification = true): Promise<boolean> {
+        this.$store.commit('setIsLoading', true)
+        return this.$axios.post(process.env.VUE_APP_BACKEND_API + "/playlists", {
+            name: name,
+            description: description,
+            public: isPublic,
+            collaborative: isCollaborative
+        })
+            .then(() => {
+                this.$store.commit('setIsLoading', false)
+                if (notification) {
+                    this.$bvModal.msgBoxOk('Successfully created playlist!',
+                        {title: 'Success', okVariant: 'success'})
+                }
+                return true
+            }).catch(error => {
+                this.$store.commit('setIsLoading', false)
+                console.log(error)
+                return false
+            })
+    }
+
     getPlaylistsData(): Promise<IPlaylist[]> {
         this.$store.commit('setIsLoading', true)
         return this.$axios.get(process.env.VUE_APP_BACKEND_API + "/playlists")
