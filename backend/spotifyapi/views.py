@@ -70,7 +70,7 @@ class Playlists(View):
         for playlist in playlists:
             data = dict()
             if playlist.get('name') is None and playlist.get('public') is None and \
-                    playlist.get('collaborative') is None and playlist.get('description', '') is '':
+                    playlist.get('collaborative') is None and playlist.get('description', '') == '':
                 return HttpResponse(status=400)
 
             if playlist.get('name') is not None:
@@ -79,12 +79,28 @@ class Playlists(View):
                 data['public'] = playlist['public']
             if playlist.get('collaborative') is not None:
                 data['collaborative'] = playlist['collaborative']
-            if playlist.get('description', '') is not '':
+            if playlist.get('description', '') != '':
                 data['description'] = playlist['description']
             url = SPOTIFY_API_URL + '/playlists/' + playlist['id']
             response = requests.put(url=url, json=data, headers=request.AUTH)
             if response.status_code != 200:
                 return HttpResponse(status=response.status_code)
+        return HttpResponse(status=200)
+
+    def post(self, request):
+        get_user_data(request)
+
+        data = {
+            'name': request.POST.get('name'),
+            'description': request.POST.get('description'),
+            'public': request.POST.get('public'),
+            'collaborative': request.POST.get('collaborative')
+        }
+
+        url = SPOTIFY_API_URL + '/users/' + request.session['username'] + '/playlists'
+        response = requests.post(url=url, json=data, headers=request.AUTH)
+        if response.status_code != 200:
+            return HttpResponse(status=response.status_code)
         return HttpResponse(status=200)
 
     def delete(self, request):
@@ -179,3 +195,12 @@ class PlaylistTracks(View):
             if response.status_code != 200:
                 return HttpResponse(status=response.status_code)
         return HttpResponse(status=200)
+
+
+def get_user_data(request):
+    response = requests.get(url=SPOTIFY_API_URL + '/me', headers=request.AUTH)
+    print(response)
+    json_response = response.json()
+
+    request.session['username'] = json_response['id']
+    return response.json()

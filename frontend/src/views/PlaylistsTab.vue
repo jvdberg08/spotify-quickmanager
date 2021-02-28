@@ -1,6 +1,7 @@
 <template>
   <TabBase>
     <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"/>
+    <CreatePlaylistModal :id="'create-playlist-modal'"/>
 
     <b-col class="py-3 px-0 px-sm-5">
 
@@ -12,6 +13,9 @@
         <MenuDropdownButton :id="'actions-dropdown-button'" container-size="col-4 col-sm-3 col-md-2"
                             button-text="Actions" button-size="lg" button-variant="primary">
           <b-dropdown-item id="refresh-dropdown-item" @click="getPlaylists">Refresh</b-dropdown-item>
+          <b-dropdown-item id="create-dropdown-item" @click="$bvModal.show('create-playlist-modal')">
+            Create
+          </b-dropdown-item>
           <b-dropdown-item id="edit-dropdown-item" @click="openEditPlaylistModal">Edit</b-dropdown-item>
           <b-dropdown-item id="unfollow-dropdown-item" @click="unfollowPlaylists">Unfollow</b-dropdown-item>
           <b-dropdown-item id="change-public-private-dropdown-item"
@@ -54,9 +58,11 @@ import EditPlaylistModal from "@/views/EditPlaylistModal.vue";
 import {Component} from "vue-property-decorator";
 import PlaylistAPI, {EditPlaylistType} from "@/mixins/playlist_api";
 import {Playlist as IPlaylist} from "@/mixins/interfaces"
+import CreatePlaylistModal from "@/views/CreatePlaylistModal.vue";
 
 @Component({
   components: {
+    CreatePlaylistModal,
     Playlist,
     MenuButton,
     MenuDropdownButton,
