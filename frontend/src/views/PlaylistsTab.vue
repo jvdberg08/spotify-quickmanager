@@ -1,5 +1,5 @@
 <template>
-  <TabBase>
+  <b-col>
     <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"/>
     <CreatePlaylistModal :id="'create-playlist-modal'"/>
 
@@ -43,7 +43,7 @@
       </DataContainer>
 
     </b-col>
-  </TabBase>
+  </b-col>
 </template>
 
 <script lang="ts">
@@ -52,7 +52,6 @@ import MenuButton from "@/components/MenuButton.vue";
 import MenuDropdownButton from "@/components/MenuDropdownButton.vue";
 import DataContainer from "@/components/DataContainer.vue";
 import SearchContainer, {FilterType} from "@/components/SearchContainer.vue";
-import TabBase from "@/views/TabBase.vue";
 import EditPlaylistModal from "@/views/EditPlaylistModal.vue";
 
 import {Component} from "vue-property-decorator";
@@ -68,8 +67,7 @@ import CreatePlaylistModal from "@/views/CreatePlaylistModal.vue";
     MenuDropdownButton,
     EditPlaylistModal,
     DataContainer,
-    SearchContainer,
-    TabBase
+    SearchContainer
   }
 })
 export default class PlaylistsTab extends PlaylistAPI {

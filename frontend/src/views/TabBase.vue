@@ -1,5 +1,5 @@
 <template>
-  <b-row v-if="!requireAuthorization || this.$store.getters.checkAuthorization">
+  <b-row no-gutters v-if="!requireAuthorization || this.$store.getters.checkAuthorization">
     <slot/>
   </b-row>
   <b-row v-else style="min-height: 60vh">
