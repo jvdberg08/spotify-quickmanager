@@ -1,14 +1,14 @@
 <template>
-  <b-container id="container" fluid="">
-    <b-row>
-      <b-col id="navbar-container" class="p-4 d-none d-sm-block" cols="0" sm="1">
+  <b-container id="container" fluid="" class="p-0">
+    <b-row no-gutters>
+      <b-container id="navbar-container" class="p-4 m-0 d-none d-sm-block">
         <NavBar/>
-      </b-col>
-      <b-col id="main-container" class="px-3 py-4" cols="12" sm="11">
+      </b-container>
+      <b-container id="main-container" fluid="" class="px-3 py-4 m-0">
         <TabBase>
           <router-view/>
         </TabBase>
-      </b-col>
+      </b-container>
     </b-row>
   </b-container>
 </template>
@@ -29,18 +29,30 @@ export default class App extends Vue {
 }
 </script>
 
-<style scoped>
+<style>
 
 #container {
   background-color: #0F1745;
 }
+
 #navbar-container {
   height: 100vh;
-  min-width: 104px;
   max-width: 124px;
 }
 
 #main-container {
+  min-height: 100vh;
   border-top-left-radius: 30px;
+}
+
+@media (min-width: 576px) {
+  #main-container {
+    max-width: calc(100vw - 124px - 16px);
+  }
+}
+
+.modal-content {
+  background: #0F1745 !important;
+  color: #BCD2EE;
 }
 </style>

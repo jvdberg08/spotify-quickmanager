@@ -3,80 +3,59 @@
     <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"/>
     <CreatePlaylistModal :id="'create-playlist-modal'"/>
 
-    <b-col class="py-3 px-0 px-sm-5">
+    <MenuBar :objects="playlists" v-model="filteredPlaylists">
+      <ButtonCreate @click="$bvModal.show('create-playlist-modal')"/>
+      <ButtonEdit @click="openEditPlaylistModal"/>
+      <ButtonVisibility @click="changePlaylistsStatus(EditPlaylistType.Visibility)"/>
+      <ButtonCollaboration @click="changePlaylistsStatus(EditPlaylistType.Collaboration)"/>
+      <ButtonDelete @click="unfollowPlaylists"/>
+      <ButtonRefresh @click="getPlaylists"/>
+    </MenuBar>
 
-      <b-row class="text-center" align-h="center">
-        <MenuButton :id="'previous-button'" container-size="col-4 col-sm-3 col-md-2"
-                    button-text="Previous" button-size="lg" button-variant="secondary"
-                    @click="goToPage(page - 1)"/>
-
-        <MenuDropdownButton :id="'actions-dropdown-button'" container-size="col-4 col-sm-3 col-md-2"
-                            button-text="Actions" button-size="lg" button-variant="primary">
-          <b-dropdown-item id="refresh-dropdown-item" @click="getPlaylists">Refresh</b-dropdown-item>
-          <b-dropdown-item id="create-dropdown-item" @click="$bvModal.show('create-playlist-modal')">
-            Create
-          </b-dropdown-item>
-          <b-dropdown-item id="edit-dropdown-item" @click="openEditPlaylistModal">Edit</b-dropdown-item>
-          <b-dropdown-item id="unfollow-dropdown-item" @click="unfollowPlaylists">Unfollow</b-dropdown-item>
-          <b-dropdown-item id="change-public-private-dropdown-item"
-                           @click="changePlaylistsStatus(EditPlaylistType.Visibility)">
-            Make Public/Private
-          </b-dropdown-item>
-          <b-dropdown-item id="change-collaborative-dropdown-item"
-                           @click="changePlaylistsStatus(EditPlaylistType.Collaboration)">
-            Make Collaborative/Non-Collaborative
-          </b-dropdown-item>
-        </MenuDropdownButton>
-
-        <MenuButton :id="'next-button'" container-size="col-4 col-sm-3 col-md-2"
-                    button-text="Next" button-size="lg" button-variant="secondary"
-                    @click="goToPage(page + 1)"/>
-      </b-row>
-
-      <DataContainer container-classes="px-5 py-3" :is-loading="isLoading">
-        <SearchContainer :items="playlists" :types="filterOptions" v-model="filteredPlaylists">
-          <b-col class="p-2" cols="12" lg="4" xl="3" v-for="playlist in shownPlaylists" :key="String(playlist.id)"
-                 @click="selectPlaylist(playlist)">
-            <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
-          </b-col>
-        </SearchContainer>
-      </DataContainer>
-
-    </b-col>
+    <DataContainer id="playlists-container" class="py-2 mt-4 no-gutters">
+      <b-col class="px-2 pb-4" cols="12" lg="4" xl="3" v-for="playlist in filteredPlaylists" :key="String(playlist.id)"
+             @click="selectPlaylist(playlist)">
+        <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
+      </b-col>
+    </DataContainer>
   </b-col>
 </template>
 
 <script lang="ts">
 import Playlist from "@/components/Playlist.vue";
-import MenuButton from "@/components/MenuButton.vue";
-import MenuDropdownButton from "@/components/MenuDropdownButton.vue";
 import DataContainer from "@/components/DataContainer.vue";
-import SearchContainer, {FilterType} from "@/components/SearchContainer.vue";
 import EditPlaylistModal from "@/views/EditPlaylistModal.vue";
+import CreatePlaylistModal from "@/views/CreatePlaylistModal.vue";
+import MenuBar from "@/components/MenuBar.vue";
+import ButtonCreate from "@/components/ButtonCreate.vue";
+import ButtonEdit from "@/components/ButtonEdit.vue";
+import ButtonVisibility from "@/components/ButtonVisibility.vue";
+import ButtonCollaboration from "@/components/ButtonCollaboration.vue";
+import ButtonDelete from "@/components/ButtonDelete.vue";
+import ButtonRefresh from "@/components/ButtonRefresh.vue";
 
 import {Component} from "vue-property-decorator";
 import PlaylistAPI, {EditPlaylistType} from "@/mixins/playlist_api";
 import {Playlist as IPlaylist} from "@/mixins/interfaces"
-import CreatePlaylistModal from "@/views/CreatePlaylistModal.vue";
 
 @Component({
   components: {
+    ButtonRefresh,
+    ButtonDelete,
+    ButtonCollaboration,
+    ButtonVisibility,
+    ButtonEdit,
+    ButtonCreate,
+    MenuBar,
     CreatePlaylistModal,
     Playlist,
-    MenuButton,
-    MenuDropdownButton,
     EditPlaylistModal,
     DataContainer,
-    SearchContainer
   }
 })
 export default class PlaylistsTab extends PlaylistAPI {
   EditPlaylistType = EditPlaylistType
-  filterOptions = [FilterType.Name, FilterType.Description, FilterType.Owner]
 
-  isLoading = false
-  page = 0
-  itemsPerPage = 28
   playlists: IPlaylist[] = []
   filteredPlaylists: IPlaylist[] = []
   selectedPlaylistIds: string[] = []
@@ -85,11 +64,6 @@ export default class PlaylistsTab extends PlaylistAPI {
     if (this.$store.getters.checkAuthorization) {
       this.getPlaylists()
     }
-  }
-
-
-  get shownPlaylists(): IPlaylist[] {
-    return this.filteredPlaylists.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
   }
 
   get selectedPlaylists(): IPlaylist[] {
@@ -113,12 +87,6 @@ export default class PlaylistsTab extends PlaylistAPI {
     this.changePlaylistsStatusData(this.selectedPlaylists, type)
   }
 
-  goToPage(newPage: number) {
-    if (newPage >= 0 && newPage * this.itemsPerPage < this.playlists.length) {
-      this.page = newPage
-    }
-  }
-
   selectPlaylist(playlist: IPlaylist) {
     if (this.selectedPlaylistIds.includes(playlist.id)) {
       this.selectedPlaylistIds.splice(this.selectedPlaylistIds.indexOf(playlist.id), 1)
@@ -140,5 +108,8 @@ export default class PlaylistsTab extends PlaylistAPI {
 </script>
 
 <style scoped>
-
+#playlists-container {
+  max-height: calc(100vh - 80px - 72px);
+  overflow-y: auto;
+}
 </style>

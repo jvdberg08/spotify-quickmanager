@@ -1,26 +1,26 @@
 <template>
   <b-row no-gutters id="navbar">
-    <b-col id="navbar-items" class="my-auto">
+    <b-col id="navbar-items">
       <router-link id="navbar-items-songs" to="/songs">
-        <b-col class="p-0 my-4 text-center">
+        <b-col class="py-1 my-3 text-center">
           <img src="../../public/liked_songs.svg" alt="Liked Songs"/>
         </b-col>
       </router-link>
 
       <router-link id="navbar-items-playlists" to="/playlists">
-        <b-col class="p-0 my-4 text-center">
+        <b-col class="py-1 my-3  text-center">
           <img src="../../public/playlists.svg" alt="Playlists"/>
         </b-col>
       </router-link>
 
       <router-link id="navbar-item-artists" to="/artists">
-        <b-col class="p-0 my-4 text-center">
+        <b-col class="py-1 my-3 text-center">
           <img src="../../public/artists.svg" alt="Artists"/>
         </b-col>
       </router-link>
 
       <router-link id="navbar-item-albums" to="/albums">
-        <b-col class="p-0 my-4 text-center">
+        <b-col class="py-1 my-3 text-center">
           <img src="../../public/albums.svg" alt="Albums"/>
         </b-col>
       </router-link>
@@ -71,6 +71,11 @@ export default class NavBar extends Vue {
   height: 72px;
   width: 100%;
   cursor: pointer;
+  transition: transform 0.5s;
+}
+
+.navbar-account:hover {
+  transform: scale(1.2);
 }
 
 #navbar-logout img {
@@ -90,33 +95,36 @@ export default class NavBar extends Vue {
   margin-top: 20px;
 }
 
+#navbar-items {
+  min-width: 100%;
+  margin-top: 25vh;
+}
+
 #navbar-items div {
-  height: 56px;
+  height: 64px;
   width: 100%;
   color: #0F1745;
-  transition: margin-left 0.5s;
+  transition: transform 0.5s ease-out;
 }
 
 #navbar-items img {
   height: 32px;
   width: 32px;
-  transition: margin-right 0.5s;
   margin-top: 12px;
   filter: brightness(0) saturate(100%) invert(10%) sepia(14%) saturate(6248%) hue-rotate(209deg) brightness(101%) contrast(104%);
 }
 
 #navbar-items img:hover {
-  filter: drop-shadow(0px 0px 20px #BCD2EE) invert(79%) sepia(6%) saturate(1000%) hue-rotate(173deg) brightness(101%) contrast(102%) !important;
+  filter: drop-shadow(0px 0px 10px #BCD2EE) invert(79%) sepia(6%) saturate(1000%) hue-rotate(173deg) brightness(101%) contrast(102%) !important;
 }
 
 .router-link-active div {
   border-radius: 20px 0 0 20px;
   background-color: #0F1745;
-  margin-left: 24px;
+  transform: translate(40%, 0);
 }
 
 .router-link-active img {
-  margin-right: 12px;
-  filter: drop-shadow(0px 0px 20px #BCD2EE) invert(79%) sepia(6%) saturate(1000%) hue-rotate(173deg) brightness(101%) contrast(102%) !important;
+  filter: drop-shadow(0px 0px 10px #BCD2EE) invert(79%) sepia(6%) saturate(1000%) hue-rotate(173deg) brightness(101%) contrast(102%) !important;
 }
 </style>

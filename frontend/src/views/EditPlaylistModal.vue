@@ -34,24 +34,20 @@
         </b-col>
       </b-row>
 
-      <b-row class="text-center justify-content-center">
-        <MenuButton :id="'refresh-button'" container-size="col-6 col-md-4 col-lg-3"
-                    button-text="Refresh" button-size="lg"
-                    button-variant="primary" @click="getSongs"/>
+      <MenuBar :objects="tracks" v-model="filteredTracks">
+        <ButtonDelete @click="removeSongs"/>
+        <ButtonRefresh @click="getSongs"/>
+      </MenuBar>
 
-        <MenuButton :id="'remove-button'" container-size="col-6 col-md-4 col-lg-3"
-                    button-text="Remove" button-size="lg"
-                    button-variant="danger" @click="removeSongs"/>
-      </b-row>
-
-      <Draggable v-model="tracks">
-        <DataContainer container-classes="px-2 mx-2 px-lg-4 mx-lg-4 pt-3 justify-content-center" :min-height="30">
-          <b-col cols="12" class="p-2" v-for="track in tracks" :key="track.id"
+      <DataContainer class="py-2 no-gutters" :min-height="40">
+        <Draggable class="no-gutters" v-model="tracks" style="min-width: 100%"
+                   animation="150" scroll-sensitivity="150" :force-fallback="true">
+          <b-col cols="12" class="py-2" v-for="track in filteredTracks" :key="track.id"
                  @click="selectSong(track)">
-            <Song :track="track" :is-selected="selectedTracks.includes(track)" :with-handle="true"/>
+            <Track :track="track" :is-selected="selectedTracks.includes(track)" :with-handle="true"/>
           </b-col>
-        </DataContainer>
-      </Draggable>
+        </Draggable>
+      </DataContainer>
 
     </b-container>
   </b-modal>
@@ -59,7 +55,6 @@
 
 <script lang="ts">
 import Track from "@/components/Track.vue";
-import MenuButton from "@/components/MenuButton.vue";
 import DataContainer from "@/components/DataContainer.vue";
 import Draggable from 'vuedraggable'
 
@@ -68,11 +63,16 @@ import {Playlist as IPlaylist, Track as ITrack} from "@/mixins/interfaces"
 import TrackAPI from "../mixins/track_api";
 import PlaylistAPI from "@/mixins/playlist_api";
 import {BvEvent, BvModalEvent} from "bootstrap-vue";
+import MenuBar from "@/components/MenuBar.vue";
+import ButtonRefresh from "@/components/ButtonRefresh.vue";
+import ButtonDelete from "@/components/ButtonDelete.vue";
 
 @Component({
   components: {
-    Song: Track,
-    MenuButton,
+    ButtonDelete,
+    ButtonRefresh,
+    MenuBar,
+    Track,
     DataContainer,
     Draggable
   }
@@ -90,6 +90,7 @@ export default class EditPlaylistModal extends Mixins(TrackAPI, PlaylistAPI) {
   }
 
   tracks: ITrack[] = []
+  filteredTracks: ITrack[] = []
   selectedTrackIds: string[] = []
 
   mounted() {
@@ -159,5 +160,7 @@ export default class EditPlaylistModal extends Mixins(TrackAPI, PlaylistAPI) {
 </script>
 
 <style>
-
+.sortable-drag {
+  opacity: 0;
+}
 </style>
