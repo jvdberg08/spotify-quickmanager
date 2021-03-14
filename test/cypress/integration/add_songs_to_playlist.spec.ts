@@ -27,14 +27,11 @@ context('Check Add Songs To Playlists Functionality', () => {
                 .should('have.class', 'track-container-is-selected')
         }))
 
-        // Step 2 - 3
-        cy.get('#actions-dropdown-button')
-            .should('be.visible').click()
-        cy.contains('a', 'Add Selected To Playlist')
-            .should('be.visible').click()
+        // Step 2
+        cy.get('#button-playlist-add').should('be.visible').click()
         cy.get('#add-songs-to-playlist-modal').should('be.visible')
 
-        // Step 4
+        // Step 3
         cy.fixture('playlists1.json').then(fixture => fixture.playlists.forEach(playlist => {
             cy.contains('.playlist-container', playlist.name)
                 .should('be.visible')
@@ -43,22 +40,20 @@ context('Check Add Songs To Playlists Functionality', () => {
                 .should('have.class', 'playlist-container-is-selected')
         }))
 
-        // Step 5
+        // Step 4
         cy.get('.modal-footer').contains('button', 'Cancel').should('be.visible')
         cy.get('.modal-footer').contains('button', 'OK').should('be.visible').click()
         cy.get('.modal-dialog').should('be.visible')
         cy.get('.modal-title').should('have.text', 'Success')
         cy.get('.modal-body').should('have.text', 'Successfully added songs to the playlists!')
 
-        // Step 6
+        // Step 5
         cy.get('.modal-footer').contains('button', 'OK').should('be.visible').click()
         cy.get('.modal-dialog').should('not.exist')
 
-        // Step 7
-        cy.fixture('tracks1.json').then(fixture => {
-            cy.getAccessToken(false).then(accessToken => {
-                cy.checkPlaylistsHaveTracks(this.playlists, 'tracks1.json', accessToken)
-            })
+        // Step 6
+        cy.getAccessToken(false).then(accessToken => {
+            cy.checkPlaylistsHaveTracks(this.playlists, 'tracks1.json', accessToken)
         })
     })
 })
