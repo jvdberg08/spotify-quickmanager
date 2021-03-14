@@ -53,7 +53,9 @@ context('Check Unfollow Playlists Functionality', () => {
 
         // Step 8
         cy.getAccessToken(false).then(accessToken => {
-            cy.checkPlaylists(this.playlists, false, accessToken)
+            cy.getPlaylists(accessToken).then(playlists => {
+                expect(playlists.map(item => item.id).join(',')).to.not.include(this.playlists.join(','))
+            })
         })
     })
 })

@@ -182,7 +182,7 @@ export default class PlaylistAPI extends Vue {
             this.$store.commit('setIsLoading', false)
             if (notification) {
                 this.$bvModal.msgBoxOk('Successfully edited the following playlists: ' +
-                    data.validPlaylists.map(playlist => playlist.name).join() + '!', {
+                    data.validPlaylists.map(playlist => playlist.name).join(', ') + '!', {
                     title: 'Success', okVariant: 'success'
                 })
             }
