@@ -1,76 +1,53 @@
 <template>
-  <TabBase>
+  <b-col>
     <AddSongsToPlaylistModal :id="'add-songs-to-playlist-modal'" :tracks="selectedTracks"/>
 
-    <b-col class="py-3 px-0 px-sm-5">
-      <b-row class="text-center" align-h="center">
-        <MenuButton :id="'previous-button'" container-size="col-4 col-sm-3 col-md-2"
-                    button-text="Previous" button-size="lg" button-variant="secondary"
-                    @click="goToPage(page - 1)"/>
+    <MenuBar :objects="tracks" v-model="filteredTracks">
+      <ButtonPlaylistAdd @click="openSelectPlaylistsModal"/>
+      <ButtonDelete @click="removeTracks"/>
+      <ButtonRefresh @click="getTracks"/>
+    </MenuBar>
 
-        <MenuDropdownButton :id="'actions-dropdown-button'" container-size="col-4 col-sm-3 col-md-2"
-                            button-text="Actions" button-size="lg" button-variant="primary">
-          <b-dropdown-item @click="getTracks">Refresh</b-dropdown-item>
-          <b-dropdown-item @click="openSelectPlaylistsModal">Add Selected To Playlist</b-dropdown-item>
-          <b-dropdown-item @click="removeTracks">Remove Selected from Liked Songs</b-dropdown-item>
-        </MenuDropdownButton>
-
-        <MenuButton :id="'next-button'" container-size="col-4 col-sm-3 col-md-2"
-                    button-text="Next" button-size="lg" button-variant="secondary"
-                    @click="goToPage(page + 1)"/>
-      </b-row>
-
-      <DataContainer container-classes="px-5 py-3">
-        <SearchContainer :items="tracks" :types="filterOptions" v-model="filteredTracks">
-          <b-col class="p-2" cols="12" lg="4" xl="3" v-for="track in shownTracks" :key="String(track.id)"
-                 v-on:click="selectSong(track)">
-            <Track :track="track" :is-selected="selectedTracks.includes(track)"/>
-          </b-col>
-        </SearchContainer>
-      </DataContainer>
-    </b-col>
-  </TabBase>
+    <DataContainer id="tracks-container" class="py-2 mt-4 no-gutters">
+      <b-col class="px-2 pb-3" cols="12" lg="4" xl="3" v-for="track in filteredTracks" :key="String(track.id)"
+             v-on:click="selectSong(track)">
+        <Track :track="track" :is-selected="selectedTracks.includes(track)"/>
+      </b-col>
+    </DataContainer>
+  </b-col>
 </template>
 
 <script lang="ts">
-import Track from "@/components/Track.vue"
-import TabBase from "@/views/TabBase.vue";
-import MenuButton from "@/components/MenuButton.vue";
-import MenuDropdownButton from "@/components/MenuDropdownButton.vue";
+import Track from "@/components/Track.vue";
 import DataContainer from "@/components/DataContainer.vue";
-import SearchContainer, {FilterType} from "@/components/SearchContainer.vue";
 import AddSongsToPlaylistModal from "@/views/AddSongsToPlaylistsModal.vue";
 
 import {Component} from 'vue-property-decorator'
 import TrackAPI from "@/mixins/track_api";
 import {Track as ITrack} from "@/mixins/interfaces";
+import MenuBar from "@/components/MenuBar.vue";
+import ButtonDelete from "@/components/ButtonDelete.vue";
+import ButtonPlaylistAdd from "@/components/ButtonPlaylistAdd.vue";
+import ButtonRefresh from "@/components/ButtonRefresh.vue";
 
 @Component({
   components: {
+    ButtonRefresh,
+    ButtonPlaylistAdd,
+    ButtonDelete,
+    MenuBar,
     Track,
-    TabBase,
-    MenuButton,
-    MenuDropdownButton,
     DataContainer,
-    SearchContainer,
     AddSongsToPlaylistModal
   }
 })
 export default class SongsTab extends TrackAPI {
-  filterOptions = [FilterType.Name, FilterType.Artist, FilterType.Album]
-
-  page = 0
-  itemsPerPage = 28
   tracks: ITrack[] = []
   filteredTracks: ITrack[] = []
   selectedTrackIds: string[] = []
 
   beforeMount() {
     if (this.$store.getters.checkAuthorization) this.getTracks()
-  }
-
-  get shownTracks(): ITrack[] {
-    return this.filteredTracks.slice(this.page * this.itemsPerPage, (this.page + 1) * this.itemsPerPage)
   }
 
   get selectedTracks(): ITrack[] {
@@ -88,12 +65,6 @@ export default class SongsTab extends TrackAPI {
         this.getTracks()
       }
     })
-  }
-
-  goToPage(newPage: number) {
-    if (newPage >= 0 && newPage * this.itemsPerPage < this.tracks.length) {
-      this.page = newPage
-    }
   }
 
   selectSong(track: ITrack) {
@@ -117,5 +88,8 @@ export default class SongsTab extends TrackAPI {
 </script>
 
 <style scoped>
-
+#tracks-container {
+  max-height: calc(100vh - 80px - 72px);
+  overflow-y: auto;
+}
 </style>

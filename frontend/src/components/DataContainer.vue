@@ -1,5 +1,5 @@
 <template>
-  <b-row :class="containerClasses" :style="{minHeight: getMinHeight + 'vh'}">
+  <b-row :style="{minHeight: getMinHeight + 'vh'}">
     <b-col v-if="$store.getters.isLoading" class="text-center m-auto">
       <b-spinner id="loading-spinner" class="spinner" type="grow" variant="primary"/>
     </b-col>
@@ -13,7 +13,6 @@ import {Component, Prop, Vue} from "vue-property-decorator";
 @Component
 export default class DataContainer extends Vue {
 
-  @Prop({default: 'px-5 py-3'}) containerClasses!: string
   @Prop({default: 70}) minHeight!: number
 
   get getMinHeight() {

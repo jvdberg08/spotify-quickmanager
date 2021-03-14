@@ -23,17 +23,14 @@ context('Check Remove Liked Songs Functionality', () => {
                 .should('have.class', 'track-container-is-selected')
         }))
 
-        // Step 2 - 3
-        cy.get('#actions-dropdown-button')
-            .should('be.visible').click()
-        cy.contains('a', 'Remove Selected from Liked Songs')
-            .should('be.visible').click()
+        // Step 2
+        cy.get('#button-delete').should('be.visible').click()
         cy.get('.modal-dialog').should('be.visible')
         cy.get('.modal-title').should('have.text', 'Please Confirm')
         cy.get('.modal-body').should('have.text',
             'Are you sure you want to remove all selected songs from your Liked Songs?')
 
-        // Step 4
+        // Step 3
         cy.get('.modal-footer').contains('button', 'Delete').should('be.visible')
         cy.get('.modal-footer').contains('button', 'Cancel').should('be.visible').click()
         cy.get('.modal-dialog').should('not.exist')
@@ -41,30 +38,29 @@ context('Check Remove Liked Songs Functionality', () => {
             cy.checkLikedTracks('tracks1.json', true, accessToken)
         })
 
-        // Step 5
+        // Step 4
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
             cy.contains('.track-container', track.name)
                 .should('be.visible')
                 .and('have.class', 'track-container-is-selected')
         }))
-        cy.get('#actions-dropdown-button').click()
 
-        // Step 6
-        cy.contains('a', 'Remove Selected from Liked Songs').click()
+        // Step 4
+        cy.get('#button-delete').click()
         cy.get('.modal-dialog').should('be.visible')
 
-        // Step 7
+        // Step 5
         cy.get('.modal-footer').contains('button', 'Cancel').should('be.visible')
         cy.get('.modal-footer').contains('button', 'Delete').should('be.visible').click()
         cy.get('.modal-dialog').should('be.visible')
         cy.get('.modal-title').should('have.text', 'Success')
         cy.get('.modal-body').should('have.text', 'Successfully removed songs from Liked Songs!')
 
-        // Step 8
+        // Step 6
         cy.get('.modal-footer').contains('button', 'OK').should('be.visible').click()
         cy.get('.modal-dialog').should('not.exist')
 
-        // Step 9
+        // Step 7
         cy.getAccessToken(false).then(accessToken => {
             cy.checkLikedTracks('tracks1.json', false, accessToken)
         })

@@ -23,11 +23,9 @@ context('Check Refresh Functionality', () => {
         })
 
         // Step 2
-        cy.get('#actions-dropdown-button').should('be.visible').click()
-            .contains('a', 'Refresh').should('be.visible')
+        cy.get('#button-refresh').should('be.visible').click()
 
-        // Step 3 & 4
-        cy.contains('a', 'Refresh').click()
+        // Step 3
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
             cy.contains('.track-container', track.name)
                 .should('be.visible')
@@ -37,15 +35,11 @@ context('Check Refresh Functionality', () => {
                 .and('have.class', 'track-container-is-selected')
         }))
 
-        // Step 5
-        cy.get('#actions-dropdown-button').should('be.visible').click()
-            .contains('a', 'Add Selected To Playlist').should('be.visible')
-
-        // Step 6
-        cy.contains('a', 'Add Selected To Playlist').click()
+        // Step 4
+        cy.get('#button-playlist-add').should('be.visible').click()
         cy.get('#add-songs-to-playlist-modal').should('be.visible')
 
-        // Step 7
+        // Step 5
         cy.fixture('playlists1.json').then(fixture => {
             fixture.playlists.forEach(playlist => {
                 cy.contains('.playlist-container', playlist.name)
@@ -60,26 +54,26 @@ context('Check Refresh Functionality', () => {
             })
         })
 
-        // Step 8
-        cy.get('#refresh-button').should('be.visible').click()
+        // Step 6
+        cy.get('.modal-dialog').find('#button-refresh').should('be.visible').click()
         cy.fixture('playlists1.json').then(fixture => fixture.playlists.forEach(playlist => {
             cy.contains('.playlist-container', playlist.name)
                 .should('be.visible')
         }))
 
-        // Step 9
+        // Step 7
         cy.contains('button', 'Cancel').should('be.visible').click()
         cy.get('#add-songs-to-playlist-modal').should('not.exist')
 
-        // Step 10
+        // Step 8
         cy.getAccessToken(false).then(accessToken => {
             cy.unfollowPlaylists(this.playlists, accessToken)
         })
 
-        // Step 11
-        cy.get('#navigation-playlists').should('be.visible').click()
+        // Step 9
+        cy.get('#navbar-items-playlists').should('be.visible').click()
 
-        // Step 12
+        // Step 10
         cy.fixture('playlists1.json').then(fixture => fixture.playlists.forEach(playlist => {
             cy.contains('.playlist-container', playlist.name)
                 .should('not.exist')
@@ -88,24 +82,20 @@ context('Check Refresh Functionality', () => {
             cy.createPlaylists('playlists1.json', accessToken, (playlists => this.playlists = playlists))
         })
 
-        // Step 13
-        cy.get('#actions-dropdown-button').should('be.visible').click()
-            .contains('a', 'Refresh').should('be.visible')
-
-        // Step 14
-        cy.contains('a', 'Refresh').click()
+        // Step 11
+        cy.get('#button-refresh').should('be.visible').click()
         cy.fixture('playlists1.json').then(fixture => fixture.playlists.forEach(playlist => {
             cy.contains('.playlist-container', playlist.name)
                 .should('be.visible')
                 .and('not.have.class', 'playlist-container-is-selected')
         }))
 
-        // Step 15
+        // Step 12
         cy.getAccessToken(false).then(accesstoken => {
             cy.addTracksToPlaylists('tracks1.json', this.playlists, accesstoken)
         })
 
-        // Step 16
+        // Step 13
         cy.fixture('playlists1.json').then(fixture => {
             cy.contains('.playlist-container', fixture.playlists[0].name)
                 .click()
@@ -113,15 +103,11 @@ context('Check Refresh Functionality', () => {
                 .and('have.class', 'playlist-container-is-selected')
         })
 
-        // Step 17
-        cy.get('#actions-dropdown-button').should('be.visible').click()
-            .contains('a', 'Edit').should('be.visible')
-
-        // Step 18
-        cy.contains('a', 'Edit').click()
+        // Step 14
+        cy.get('#button-edit').should('be.visible').click()
         cy.get('#edit-playlist-modal').should('be.visible')
 
-        // Step 19
+        // Step 15
         cy.get('#edit-playlist-modal').get('.modal-body').scrollTo('bottom')
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
             cy.contains('.track-container', track.name).should('be.visible')
@@ -131,8 +117,8 @@ context('Check Refresh Functionality', () => {
             cy.contains('.track-container', track.name).should('be.visible')
         }))
 
-        // Step 20
-        cy.get('#refresh-button').should('be.visible').click()
+        // Step 16
+        cy.get('.modal-dialog').find('#button-refresh').should('be.visible').click()
         cy.fixture('tracks1.json').then(fixture => fixture.tracks.forEach(track => {
             cy.contains('.track-container', track.name).should('not.exist')
         }))

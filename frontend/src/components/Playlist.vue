@@ -41,9 +41,9 @@ export default class Playlist extends Vue {
 .playlist-container {
   cursor: pointer;
   text-align: center;
+  background-color: #1B2352;
+  color: #BCD2EE;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 30px;
 }
 
