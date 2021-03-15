@@ -1,7 +1,7 @@
-import Vue from "vue";
 import {Track as ITrack} from "@/mixins/interfaces"
 import {AxiosResponse} from "axios";
 import Component from "vue-class-component";
+import AxiosErrorHandler from "@/mixins/error";
 
 interface LikedSongsResponse {
     total: number;
@@ -9,7 +9,7 @@ interface LikedSongsResponse {
 }
 
 @Component
-export default class TrackAPI extends Vue {
+export default class TrackAPI extends AxiosErrorHandler {
 
     getSongsData(): Promise<ITrack[]> {
         this.$store.commit('setIsLoading', true)
@@ -18,8 +18,7 @@ export default class TrackAPI extends Vue {
                 this.$store.commit('setIsLoading', false)
                 return response.data.items.map(item => item.track)
             }).catch(error => {
-                this.$store.commit('setIsLoading', false)
-                console.log(error)
+                this.handleAxiosError(error)
                 return []
             })
     }
@@ -43,10 +42,9 @@ export default class TrackAPI extends Vue {
                 })
             }
             return true
-        }).catch(error => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+        }).catch((error => {
+            this.handleAxiosError(error)
             return false
-        })
+        }))
     }
 }

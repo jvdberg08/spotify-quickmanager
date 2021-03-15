@@ -16,13 +16,14 @@ Vue.use(BootstrapVue)
 Vue.use(BootstrapVueIcons)
 
 Vue.prototype.$axios = axios
-axios.defaults.withCredentials = true
-axios.defaults.xsrfHeaderName = 'X-CSRFToken'
-axios.defaults.xsrfCookieName = 'csrftoken'
+Vue.prototype.$axios.defaults.withCredentials = true
+Vue.prototype.$axios.defaults.xsrfHeaderName = 'X-CSRFToken'
+Vue.prototype.$axios.defaults.xsrfCookieName = 'csrftoken'
+
 declare module 'vue/types/vue' {
-  interface Vue {
-    $axios: AxiosStatic;
-  }
+    interface Vue {
+        $axios: AxiosStatic;
+    }
 }
 
 new Vue({
