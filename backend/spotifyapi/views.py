@@ -27,6 +27,16 @@ class LikedSongs(View):
             json_response['items'] += response.json()['items']
         return JsonResponse(data=json_response)
 
+    def put(self, request):
+        track_ids = request.PUT.get('tracks').split(',')
+
+        for i in range(0, len(track_ids), 50):
+            url = SPOTIFY_API_URL + '/me/tracks?ids=' + ','.join(track_ids[i:i + 50])
+            response = requests.put(url=url, headers=request.AUTH)
+            if response.status_code != 200:
+                return HttpResponse(status=response.status_code)
+        return HttpResponse(status=200)
+
     def delete(self, request):
         track_ids = request.GET.get(key='tracks').split(',')
 
@@ -35,6 +45,7 @@ class LikedSongs(View):
             response = requests.delete(url=url, headers=request.AUTH)
             if response.status_code != 200:
                 return HttpResponse(status=response.status_code)
+
         return HttpResponse(status=200)
 
 
@@ -195,6 +206,18 @@ class PlaylistTracks(View):
             if response.status_code != 200:
                 return HttpResponse(status=response.status_code)
         return HttpResponse(status=200)
+
+
+def search(request):
+    query = request.GET.get('query')
+    search_types = request.GET.get('types')
+
+    url = SPOTIFY_API_URL + '/search?q=' + query + '&type=' + search_types
+    response = requests.get(url=url, headers=request.AUTH)
+    if response.status_code != 200:
+        return HttpResponse(status=response.status_code)
+
+    return JsonResponse(data=response.json())
 
 
 def get_user_data(request):
