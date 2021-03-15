@@ -1,6 +1,7 @@
 import {AxiosError} from "axios";
-import Vue from "vue";
+import {Component, Vue} from "vue-property-decorator";
 
+@Component
 export default class AxiosErrorHandler extends Vue {
 
     handleAxiosError(error: AxiosError) {

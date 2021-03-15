@@ -18,8 +18,8 @@ import {Component, Prop, VModel, Vue, Watch} from "vue-property-decorator";
 @Component
 export default class MenuBar extends Vue {
 
-  @Prop({required: true}) objects!: any[]
-  @VModel() filteredObjects!: any[]
+  @Prop() objects!: any[] | undefined
+  @VModel() filteredObjects!: any
 
   query = ''
 
@@ -30,7 +30,11 @@ export default class MenuBar extends Vue {
 
   @Watch('query')
   onQueryChange() {
-    this.filteredObjects = this.objects.filter(obj => this.filter(obj))
+    if (this.objects === undefined || !this.objects.length) {
+      this.filteredObjects = this.query
+    } else {
+      this.filteredObjects = this.objects.filter(obj => this.filter(obj))
+    }
   }
 
   // eslint-disable-next-line

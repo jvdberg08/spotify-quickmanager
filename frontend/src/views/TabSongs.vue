@@ -1,8 +1,10 @@
 <template>
   <b-col>
     <ModalAddSongsToPlaylists :id="'add-songs-to-playlist-modal'" :tracks="selectedTracks"/>
+    <ModalAddSongsToSongs :id="'add-songs-to-songs-modal'"/>
 
     <MenuBar :objects="tracks" v-model="filteredTracks">
+      <ButtonCreate @click="$bvModal.show('add-songs-to-songs-modal')"/>
       <ButtonPlaylistAdd @click="openSelectPlaylistsModal"/>
       <ButtonDelete @click="removeTracks"/>
       <ButtonRefresh @click="getTracks"/>
@@ -28,10 +30,14 @@ import MenuBar from "@/components/MenuBar.vue";
 import ButtonDelete from "@/components/ButtonDelete.vue";
 import ButtonPlaylistAdd from "@/components/ButtonPlaylistAdd.vue";
 import ButtonRefresh from "@/components/ButtonRefresh.vue";
+import ButtonCreate from "@/components/ButtonCreate.vue";
 import ModalAddSongsToPlaylists from "@/views/ModalAddSongsToPlaylists.vue";
+import ModalAddSongsToSongs from "@/views/ModalAddSongsToSongs.vue";
 
 @Component({
   components: {
+    ModalAddSongsToSongs,
+    ButtonCreate,
     ButtonRefresh,
     ButtonPlaylistAdd,
     ButtonDelete,
