@@ -35,7 +35,7 @@ import ButtonRefresh from "@/components/ButtonRefresh.vue";
     DataContainer,
   }
 })
-export default class SelectPlaylistModal extends PlaylistAPI {
+export default class ModalAddSongsToPlaylists extends PlaylistAPI {
 
   @Prop({required: true}) id!: string
   @Prop({required: true}) tracks!: ITrack[]

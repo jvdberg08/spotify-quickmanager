@@ -23,6 +23,24 @@ export default class TrackAPI extends AxiosErrorHandler {
             })
     }
 
+    addSongsData(tracks: ITrack[], notification = true): Promise<boolean> {
+        this.$store.commit('setIsLoading', true)
+        return this.$axios.put(process.env.VUE_APP_BACKEND_API + '/liked_songs', {
+            tracks: tracks.map(track => track.id).join()
+        }).then(() => {
+            this.$store.commit('setIsLoading', false)
+            if (notification) {
+                this.$bvModal.msgBoxOk('Successfully added songs to Liked Songs!', {
+                    title: 'Success', okVariant: 'success'
+                }).then()
+            }
+            return true
+        }).catch(error => {
+            this.handleAxiosError(error)
+            return false
+        })
+    }
+
     async removeSongsData(tracks: ITrack[], confirm = true, notification = true): Promise<boolean> {
         if (confirm) {
             const isConfirmed = await this.$bvModal.msgBoxConfirm(

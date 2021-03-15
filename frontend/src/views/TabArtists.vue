@@ -7,7 +7,7 @@ import {Component, Vue} from "vue-property-decorator";
 
 @Component
 export default class ArtistsTab extends Vue {
-  name = "ArtistsTab"
+  name = "TabArtists.vue"
 }
 </script>
 

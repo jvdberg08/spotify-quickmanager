@@ -37,7 +37,7 @@ import {BvModalEvent} from "bootstrap-vue";
 import PlaylistAPI from '@/mixins/playlist_api';
 
 @Component
-export default class CreatePlaylistModal extends PlaylistAPI {
+export default class ModalCreatePlaylist extends PlaylistAPI {
 
   @Prop({required: true}) id!: string
 

@@ -1,8 +1,10 @@
 <template>
   <b-col>
-    <AddSongsToPlaylistModal :id="'add-songs-to-playlist-modal'" :tracks="selectedTracks"/>
+    <ModalAddSongsToPlaylists :id="'add-songs-to-playlist-modal'" :tracks="selectedTracks"/>
+    <ModalAddSongsToSongs :id="'add-songs-to-songs-modal'"/>
 
     <MenuBar :objects="tracks" v-model="filteredTracks">
+      <ButtonCreate @click="$bvModal.show('add-songs-to-songs-modal')"/>
       <ButtonPlaylistAdd @click="openSelectPlaylistsModal"/>
       <ButtonDelete @click="removeTracks"/>
       <ButtonRefresh @click="getTracks"/>
@@ -20,7 +22,6 @@
 <script lang="ts">
 import Track from "@/components/Track.vue";
 import DataContainer from "@/components/DataContainer.vue";
-import AddSongsToPlaylistModal from "@/views/AddSongsToPlaylistsModal.vue";
 
 import {Component} from 'vue-property-decorator'
 import TrackAPI from "@/mixins/track_api";
@@ -29,19 +30,24 @@ import MenuBar from "@/components/MenuBar.vue";
 import ButtonDelete from "@/components/ButtonDelete.vue";
 import ButtonPlaylistAdd from "@/components/ButtonPlaylistAdd.vue";
 import ButtonRefresh from "@/components/ButtonRefresh.vue";
+import ButtonCreate from "@/components/ButtonCreate.vue";
+import ModalAddSongsToPlaylists from "@/views/ModalAddSongsToPlaylists.vue";
+import ModalAddSongsToSongs from "@/views/ModalAddSongsToSongs.vue";
 
 @Component({
   components: {
+    ModalAddSongsToSongs,
+    ButtonCreate,
     ButtonRefresh,
     ButtonPlaylistAdd,
     ButtonDelete,
     MenuBar,
     Track,
     DataContainer,
-    AddSongsToPlaylistModal
+    ModalAddSongsToPlaylists
   }
 })
-export default class SongsTab extends TrackAPI {
+export default class TabSongs extends TrackAPI {
   tracks: ITrack[] = []
   filteredTracks: ITrack[] = []
   selectedTrackIds: string[] = []

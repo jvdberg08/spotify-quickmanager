@@ -1,7 +1,7 @@
 <template>
   <b-col>
-    <EditPlaylistModal :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"/>
-    <CreatePlaylistModal :id="'create-playlist-modal'"/>
+    <ModalEditPlaylist :id="'edit-playlist-modal'" :playlist="selectedPlaylists[0]"/>
+    <ModalCreatePlaylist :id="'create-playlist-modal'"/>
 
     <MenuBar :objects="playlists" v-model="filteredPlaylists">
       <ButtonCreate @click="$bvModal.show('create-playlist-modal')"/>
@@ -24,8 +24,8 @@
 <script lang="ts">
 import Playlist from "@/components/Playlist.vue";
 import DataContainer from "@/components/DataContainer.vue";
-import EditPlaylistModal from "@/views/EditPlaylistModal.vue";
-import CreatePlaylistModal from "@/views/CreatePlaylistModal.vue";
+import ModalEditPlaylist from "@/views/ModalEditPlaylist.vue";
+import ModalCreatePlaylist from "@/views/ModalCreatePlaylist.vue";
 import MenuBar from "@/components/MenuBar.vue";
 import ButtonCreate from "@/components/ButtonCreate.vue";
 import ButtonEdit from "@/components/ButtonEdit.vue";
@@ -47,13 +47,13 @@ import {Playlist as IPlaylist} from "@/mixins/interfaces"
     ButtonEdit,
     ButtonCreate,
     MenuBar,
-    CreatePlaylistModal,
+    ModalCreatePlaylist,
     Playlist,
-    EditPlaylistModal,
+    ModalEditPlaylist,
     DataContainer,
   }
 })
-export default class PlaylistsTab extends PlaylistAPI {
+export default class TabPlaylists extends PlaylistAPI {
   EditPlaylistType = EditPlaylistType
 
   playlists: IPlaylist[] = []
