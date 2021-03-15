@@ -1,7 +1,7 @@
-import Vue from "vue";
 import {Playlist as IPlaylist, Track as ITrack} from "@/mixins/interfaces"
-import {AxiosError, AxiosResponse} from "axios";
+import {AxiosResponse} from "axios";
 import Component from "vue-class-component";
+import AxiosErrorHandler from "@/mixins/error";
 
 interface PlaylistsResponse {
     total: number;
@@ -19,7 +19,7 @@ export enum EditPlaylistType {
 }
 
 @Component
-export default class PlaylistAPI extends Vue {
+export default class PlaylistAPI extends AxiosErrorHandler {
 
     createPlaylistData(name: string, description: string, isPublic: boolean, isCollaborative: boolean, notification = true): Promise<boolean> {
         this.$store.commit('setIsLoading', true)
@@ -28,19 +28,17 @@ export default class PlaylistAPI extends Vue {
             description: description,
             public: isPublic,
             collaborative: isCollaborative
+        }).then(() => {
+            this.$store.commit('setIsLoading', false)
+            if (notification) {
+                this.$bvModal.msgBoxOk('Successfully created playlist!',
+                    {title: 'Success', okVariant: 'success'})
+            }
+            return true
+        }).catch(error => {
+            this.handleAxiosError(error)
+            return false
         })
-            .then(() => {
-                this.$store.commit('setIsLoading', false)
-                if (notification) {
-                    this.$bvModal.msgBoxOk('Successfully created playlist!',
-                        {title: 'Success', okVariant: 'success'})
-                }
-                return true
-            }).catch(error => {
-                this.$store.commit('setIsLoading', false)
-                console.log(error)
-                return false
-            })
     }
 
     getPlaylistsData(): Promise<IPlaylist[]> {
@@ -50,8 +48,7 @@ export default class PlaylistAPI extends Vue {
                 this.$store.commit('setIsLoading', false)
                 return response.data.items
             }).catch(error => {
-                this.$store.commit('setIsLoading', false)
-                console.log(error)
+                this.handleAxiosError(error)
                 return []
             })
     }
@@ -64,8 +61,7 @@ export default class PlaylistAPI extends Vue {
             this.$store.commit('setIsLoading', false)
             return response.data.items.map(item => item.track)
         }).catch(error => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+            this.handleAxiosError(error)
             return []
         })
     }
@@ -88,8 +84,7 @@ export default class PlaylistAPI extends Vue {
             }
             return true
         }).catch(error => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+            this.handleAxiosError(error)
             return false
         })
     }
@@ -115,8 +110,7 @@ export default class PlaylistAPI extends Vue {
             }
             return true
         }).catch(error => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+            this.handleAxiosError(error)
             return false
         })
     }
@@ -135,8 +129,7 @@ export default class PlaylistAPI extends Vue {
             }
             return true
         }).catch(error => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+            this.handleAxiosError(error)
             return false
         })
     }
@@ -153,8 +146,7 @@ export default class PlaylistAPI extends Vue {
             }
             return true
         }).catch(error => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+            this.handleAxiosError(error)
             return false
         })
     }
@@ -187,9 +179,8 @@ export default class PlaylistAPI extends Vue {
                 })
             }
             return true
-        }).catch((error: AxiosError) => {
-            this.$store.commit('setIsLoading', false)
-            console.log(error)
+        }).catch((error) => {
+            this.handleAxiosError(error)
             return false
         })
     }
