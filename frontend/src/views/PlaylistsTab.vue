@@ -13,7 +13,7 @@
     </MenuBar>
 
     <DataContainer id="playlists-container" class="py-2 mt-4 no-gutters">
-      <b-col class="px-2 pb-4" cols="12" lg="4" xl="3" v-for="playlist in filteredPlaylists" :key="String(playlist.id)"
+      <b-col class="px-2 pb-3" cols="12" lg="4" xl="3" v-for="playlist in filteredPlaylists" :key="String(playlist.id)"
              @click="selectPlaylist(playlist)">
         <Playlist :playlist="playlist" :is-selected="selectedPlaylists.includes(playlist)"/>
       </b-col>
