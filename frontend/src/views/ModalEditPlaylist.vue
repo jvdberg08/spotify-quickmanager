@@ -77,7 +77,7 @@ import ButtonDelete from "@/components/ButtonDelete.vue";
     Draggable
   }
 })
-export default class EditPlaylistModal extends Mixins(TrackAPI, PlaylistAPI) {
+export default class ModalEditPlaylist extends Mixins(TrackAPI, PlaylistAPI) {
 
   @Prop({required: true}) id!: string
   @Prop({required: true}) playlist!: IPlaylist

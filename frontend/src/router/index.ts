@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import SongsTab from "@/views/SongsTab.vue";
-import PlaylistsTab from "@/views/PlaylistsTab.vue";
-import AlbumsTab from "@/views/AlbumsTab.vue";
-import ArtistsTab from "@/views/ArtistsTab.vue";
+import TabSongs from "@/views/TabSongs.vue";
+import TabPlaylists from "@/views/TabPlaylists.vue";
+import TabAlbums from "@/views/TabAlbums.vue";
+import TabArtists from "@/views/TabArtists.vue";
 
 import store from "@/store";
 
@@ -15,19 +15,19 @@ const routes = [
     {
         path: '/songs',
         name: 'songs',
-        component: SongsTab
+        component: TabSongs
     },
     {
         path: '/playlists',
-        component: PlaylistsTab
+        component: TabPlaylists
     },
     {
         path: '/albums',
-        component: AlbumsTab
+        component: TabAlbums
     },
     {
         path: '/artists',
-        component: ArtistsTab
+        component: TabArtists
     },
     {
         path: '',
