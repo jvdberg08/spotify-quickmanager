@@ -8,7 +8,6 @@ services:
       dockerfile: ./nginx/Dockerfile.prod
     ports:
       - 80:80
-    restart: always
     depends_on:
       - django
 
